@@ -104,4 +104,4 @@ The AI automatically calls these tools when live data is needed:
 
 Each tool calls your ShebaBD REST API (`SHEBABD_API_BASE_URL`) and falls
 back to mock data if the internal API is unreachable.
-   
+    
