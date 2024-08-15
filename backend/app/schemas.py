@@ -652,4 +652,4 @@ class OrganizationResponse(BaseModel):
     is_verified: bool
     created_at: datetime
 # Murad: Schema validators
-   
+    
