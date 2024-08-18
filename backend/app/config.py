@@ -65,6 +65,16 @@ class Settings(BaseSettings):
     smtp_password: str = "encuselbefwkjhuh"
     smtp_from: str = "mdfahimuntasir1488.csenub@gmail.com"
 
+    # ── Resend (preferred email transport) ───────────────────────────────────
+    resend_api_key: str = Field(default="")
+    # Use onboarding@resend.dev for testing; set a verified domain for prod
+    resend_from_email: str = Field(default="ShebaBD <onboarding@resend.dev>")
+
+    @property
+    def use_resend(self) -> bool:
+        """True when a Resend API key is configured."""
+        return bool(self.resend_api_key)
+
     # ── ShebaBD internal API (used by tool calling) ──────────────────────────
     shebabd_api_base_url: str = "http://localhost:8000/api/v1"
     shebabd_api_key: str = "internal-service-key"
@@ -90,3 +100,4 @@ class Settings(BaseSettings):
 def get_settings() -> Settings:
     """Return a cached singleton Settings instance."""
     return Settings()
+ 
