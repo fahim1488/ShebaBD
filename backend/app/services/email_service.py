@@ -459,4 +459,4 @@ async def send_event_reminder_email(
         body,
         html=True,
     )
-    
+     
