@@ -316,3 +316,4 @@ async def change_password(
     logger.info("Password changed for user: %s (id=%s)", user.email, user.id)
     return {"ok": True, "message": "Password changed successfully."}
  
+ 
