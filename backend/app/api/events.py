@@ -12,7 +12,6 @@ Handles:
 """
 from __future__ import annotations
 
-import asyncio
 import logging
 from datetime import datetime, timezone
 from typing import List, Optional
@@ -280,33 +279,33 @@ async def register_for_event(
     await db.refresh(reg)
 
     # Fire confirmation email in background — does NOT block the HTTP response
-    if event.email_confirmation_enabled:
-        _reg_id    = reg.id
-        _email     = attendee_email
-        _name      = attendee_name
-        _title     = event.title
-        _date      = event.date
-        _time      = event.time
-        _location  = event.location
-        _organizer = event.organizer
+    # Always send confirmation; pass async fn directly so FastAPI awaits it correctly
+    _reg_id    = reg.id
+    _email     = attendee_email
+    _name      = attendee_name
+    _title     = event.title
+    _date      = event.date
+    _time      = event.time
+    _location  = event.location
+    _organizer = event.organizer
 
-        async def _send_confirmation():
-            try:
-                await send_event_confirmation_email(
-                    email=_email,
-                    user_name=_name,
-                    event_title=_title,
-                    event_date=_date,
-                    event_time=_time,
-                    event_location=_location,
-                    registration_id=_reg_id,
-                    organizer=_organizer,
-                )
-                logger.info("Confirmation email dispatched to %s for event '%s'", _email, _title)
-            except Exception as exc:
-                logger.error("Background email error for %s: %s", _email, exc)
+    async def _send_confirmation():
+        try:
+            await send_event_confirmation_email(
+                email=_email,
+                user_name=_name,
+                event_title=_title,
+                event_date=_date,
+                event_time=_time,
+                event_location=_location,
+                registration_id=_reg_id,
+                organizer=_organizer,
+            )
+            logger.info("Confirmation email dispatched to %s for event '%s'", _email, _title)
+        except Exception as exc:
+            logger.error("Background email error for %s: %s", _email, exc)
 
-        background_tasks.add_task(asyncio.ensure_future, _send_confirmation())
+    background_tasks.add_task(_send_confirmation)
 
     return reg
 
@@ -442,3 +441,4 @@ async def trigger_reminders_manually(
         "status": "success",
         "details": result,
     }
+ 
