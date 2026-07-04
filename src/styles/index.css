@@ -1,3 +1,22 @@
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@500;600;700&display=swap');
+
+@import './tokens.css';
+@import './typography.css';
+@import './animations.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html {
+    @apply font-sans antialiased;
+  }
+
+  body {
+    @apply ds-body bg-ds-background text-ds-foreground;
+    transition:
+      background-color var(--ds-transition-normal) var(--ds-easing-default),
+      color var(--ds-transition-normal) var(--ds-easing-default);
+  }
+}
