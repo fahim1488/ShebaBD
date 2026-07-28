@@ -12,6 +12,10 @@ const BloodDonation = lazy(() => import('@/pages/BloodDonation'));
 const Events = lazy(() => import('@/pages/Events'));
 const About = lazy(() => import('@/pages/About'));
 const Donate = lazy(() => import('@/pages/Donate'));
+const AiFakeNgoDetection = lazy(() => import('@/pages/AiFakeNgoDetection'));
+const AiFakeReviewDetection = lazy(() => import('@/pages/AiFakeReviewDetection'));
+const AiContentGenerator = lazy(() => import('@/pages/AiContentGenerator'));
+const AiSmartSearch = lazy(() => import('@/pages/AiSmartSearch'));
 
 // Shared page-level loading fallback
 function PageLoader() {
@@ -45,6 +49,10 @@ export const router = createBrowserRouter([
       { path: ROUTES.EVENTS, element: withSuspense(Events) },
       { path: ROUTES.ABOUT, element: withSuspense(About) },
       { path: ROUTES.DONATE, element: withSuspense(Donate) },
+      { path: ROUTES.AI_NGO_DETECTION, element: withSuspense(AiFakeNgoDetection) },
+      { path: ROUTES.AI_REVIEW_DETECTION, element: withSuspense(AiFakeReviewDetection) },
+      { path: ROUTES.AI_CONTENT_GENERATOR, element: withSuspense(AiContentGenerator) },
+      { path: ROUTES.AI_SMART_SEARCH, element: withSuspense(AiSmartSearch) },
     ],
   },
 ]);
