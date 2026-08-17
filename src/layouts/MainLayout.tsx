@@ -1,6 +1,8 @@
 import { Outlet } from 'react-router-dom';
 import { Navbar } from '@/components/layout/Navbar';
 import { Footer } from '@/components/layout/Footer';
+import { AiAssistant } from '@/components/common/AiAssistant';
+import { GlobalDock } from '@/components/common/GlobalDock';
 
 export default function MainLayout() {
   return (
@@ -10,6 +12,8 @@ export default function MainLayout() {
         <Outlet />
       </main>
       <Footer />
+      <AiAssistant />
+      <GlobalDock />
     </div>
   );
 }

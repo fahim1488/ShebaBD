@@ -21,7 +21,7 @@ export type TextInputProps = BaseInputProps & {
    * SearchInput overrides this to 'search' internally.
    * @default 'text'
    */
-  type?: 'text' | 'email' | 'number' | 'password' | 'search';
+  type?: 'text' | 'email' | 'number' | 'password' | 'search' | 'tel' | 'url';
 };
 
 // ─── Component ─────────────────────────────────────────────────────────────────

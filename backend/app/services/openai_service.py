@@ -1,0 +1,388 @@
+"""
+openai_service.py — Reusable OpenAI service class.
+
+Handles
+-------
+- System prompt construction
+- Non-streaming chat completions with tool calling (agentic loop)
+- Streaming chat completions with tool calling via SSE
+- Retry logic for transient errors (rate limits, timeouts, network issues)
+- Graceful error classification
+"""
+from __future__ import annotations
+
+import datetime
+import json
+import logging
+from typing import Any, AsyncGenerator, Dict, List, Optional
+
+from openai import AsyncOpenAI, APIConnectionError, APITimeoutError, RateLimitError
+from openai.types.chat import ChatCompletion, ChatCompletionChunk
+from tenacity import (
+    retry,
+    retry_if_exception_type,
+    stop_after_attempt,
+    wait_exponential,
+)
+
+from app.config import get_settings
+from app.services.tools import TOOL_DEFINITIONS, dispatch_tool
+
+logger = logging.getLogger(__name__)
+settings = get_settings()
+
+# ── System prompt ─────────────────────────────────────────────────────────────
+def get_system_prompt() -> str:
+    now_str = datetime.datetime.now().strftime("%A, %B %d, %Y (%I:%M %p)")
+    return f"""You are **Sheba AI**, an all-knowing, fully capable, intelligent AI assistant powering the ShebaBD platform.
+
+## Current Context
+- **Today's Date & Time:** {now_str}
+
+## Your Identity & Capabilities
+- **Name:** Sheba AI (শেবা AI)
+- **Scope:** Open-domain expert. You know about **everything**: general knowledge, science, technology, programming, mathematics, history, current events, world news, weather, local information, as well as ShebaBD's volunteer, blood donation, disaster management, and NGO ecosystem.
+- **Real-Time Internet Search:** You have access to the `webSearch` tool. Whenever asked about current events, real-time news, live facts, weather, sports scores, local places, or anything requiring recent/external information, you MUST call `webSearch` to fetch live data from the web.
+
+## Response Guidelines
+- **Direct Answers:** Answer the user's question directly and immediately (e.g. if asked for the date, state today's date right away).
+- **No Unnecessary Intros:** DO NOT repeat generic introductions ("Hello! I am Sheba AI...") unless the user specifically greets you.
+
+## Tone & Style
+- Helpful, warm, clear, and highly intelligent.
+- Always respond in the **same language** the user writes in (Bangla or English).
+- Format responses using clean **Markdown** (bold key concepts, bullet lists, code blocks when applicable).
+- Keep answers structured, insightful, and easy to read.
+
+## Tool Usage Instructions
+1. **Real-Time Web Queries / General Current Info:** Call `webSearch(query="...")` to fetch live internet results.
+2. **ShebaBD Platform Queries:** Call dedicated platform tools (`findVolunteerEvents`, `findBloodRequests`, `getEmergencyContacts`, `getOrganization`, `searchFAQ`) when relevant.
+3. Synthesise tool output seamlessly into your answer without exposing raw JSON payload formatting.
+
+## Open Domain Policy
+- Answer any question the user asks accurately and helpfully.
+- Never refuse queries for being "off-topic" — you are a complete AI assistant equipped with real-time web access.
+"""
+
+
+# ── OpenAI client (singleton) ─────────────────────────────────────────────────
+class OpenAIService:
+    """
+    Wraps the AsyncOpenAI client with:
+    - agentic tool-call loop for non-streaming responses
+    - streaming generator with mid-stream tool resolution
+    - retry decorator for transient errors
+    """
+
+    def __init__(self) -> None:
+        self._client = AsyncOpenAI(
+            api_key=settings.openai_api_key,
+            timeout=settings.openai_timeout,
+            max_retries=0,   # we handle retries ourselves via tenacity
+        )
+
+    # ── Non-streaming: full agentic loop ──────────────────────────────────────
+    @retry(
+        retry=retry_if_exception_type((APIConnectionError, APITimeoutError, RateLimitError)),
+        wait=wait_exponential(multiplier=1, min=2, max=30),
+        stop=stop_after_attempt(3),
+        reraise=True,
+    )
+    async def chat(
+        self,
+        messages: List[Dict[str, Any]],
+        *,
+        max_tool_rounds: int = 5,
+    ) -> tuple[str, int, List[Dict[str, Any]]]:
+        """
+        Run a full agentic tool-call loop.
+
+        Returns
+        -------
+        (final_text, total_tokens, tool_calls_log)
+            final_text       — the assistant's final Markdown response
+            total_tokens     — cumulative token usage across all rounds
+            tool_calls_log   — list of {"name", "args", "result"} dicts
+        """
+        working_messages = [
+            {"role": "system", "content": get_system_prompt()},
+            *messages,
+        ]
+        total_tokens   = 0
+        tool_calls_log: List[Dict[str, Any]] = []
+
+        for round_num in range(max_tool_rounds):
+            logger.debug("Chat round %d — sending %d messages", round_num, len(working_messages))
+
+            completion: ChatCompletion = await self._client.chat.completions.create(
+                model=settings.openai_model,
+                messages=working_messages,
+                tools=TOOL_DEFINITIONS,
+                tool_choice="auto",
+                max_tokens=settings.openai_max_tokens,
+                temperature=settings.openai_temperature,
+            )
+
+            usage         = completion.usage
+            total_tokens += usage.total_tokens if usage else 0
+            choice        = completion.choices[0]
+            message       = choice.message
+
+            # ── No tool calls → we have the final answer ──────────────────────
+            if not message.tool_calls:
+                return message.content or "", total_tokens, tool_calls_log
+
+            # ── Tool calls requested ──────────────────────────────────────────
+            # 1. Append the assistant's tool-call message to the working list
+            working_messages.append(message.model_dump(exclude_unset=True))
+
+            # 2. Execute each tool in parallel (gather) and collect results
+            import asyncio
+            tool_tasks = [
+                _execute_tool(tc.function.name, tc.function.arguments, tc.id)
+                for tc in message.tool_calls
+            ]
+            tool_results = await asyncio.gather(*tool_tasks, return_exceptions=True)
+
+            for tc, result in zip(message.tool_calls, tool_results):
+                if isinstance(result, Exception):
+                    error_json = json.dumps({"error": str(result)})
+                    working_messages.append({
+                        "role": "tool",
+                        "tool_call_id": tc.id,
+                        "content": error_json,
+                    })
+                    tool_calls_log.append({
+                        "name":   tc.function.name,
+                        "args":   tc.function.arguments,
+                        "result": {"error": str(result)},
+                    })
+                else:
+                    working_messages.append({
+                        "role": "tool",
+                        "tool_call_id": tc.id,
+                        "content": result,
+                    })
+                    tool_calls_log.append({
+                        "name":   tc.function.name,
+                        "args":   tc.function.arguments,
+                        "result": json.loads(result),
+                    })
+
+        # Exceeded max_tool_rounds — ask the model for a plain response
+        logger.warning("Max tool rounds (%d) exceeded; requesting final answer.", max_tool_rounds)
+        working_messages.append({
+            "role": "user",
+            "content": "Please summarise what you found so far in a helpful response.",
+        })
+        completion = await self._client.chat.completions.create(
+            model=settings.openai_model,
+            messages=working_messages,
+            max_tokens=settings.openai_max_tokens,
+            temperature=settings.openai_temperature,
+        )
+        usage         = completion.usage
+        total_tokens += usage.total_tokens if usage else 0
+        return completion.choices[0].message.content or "", total_tokens, tool_calls_log
+
+    # ── Streaming ─────────────────────────────────────────────────────────────
+    async def stream_chat(
+        self,
+        messages: List[Dict[str, Any]],
+        *,
+        max_tool_rounds: int = 5,
+    ) -> AsyncGenerator[str, None]:
+        """
+        Async generator that yields SSE-formatted strings.
+
+        Event types:
+          data: {"type": "token",  "content": "..."}
+          data: {"type": "tool",   "name": "...", "status": "calling|done"}
+          data: {"type": "error",  "message": "..."}
+          data: {"type": "done",   "tokens": 123}
+          data: [DONE]
+        """
+        working_messages = [
+            {"role": "system", "content": get_system_prompt()},
+            *messages,
+        ]
+        total_tokens = 0
+
+        for round_num in range(max_tool_rounds):
+            accumulated_tool_calls: Dict[int, Dict[str, Any]] = {}
+            accumulated_content   = ""
+            finish_reason         = None
+
+            try:
+                stream = await self._client.chat.completions.create(
+                    model=settings.openai_model,
+                    messages=working_messages,
+                    tools=TOOL_DEFINITIONS,
+                    tool_choice="auto",
+                    max_tokens=settings.openai_max_tokens,
+                    temperature=settings.openai_temperature,
+                    stream=True,
+                    stream_options={"include_usage": True},
+                )
+
+                async for chunk in stream:  # type: ChatCompletionChunk
+                    # Usage arrives in the final chunk
+                    if chunk.usage:
+                        total_tokens += chunk.usage.total_tokens
+
+                    if not chunk.choices:
+                        continue
+
+                    delta        = chunk.choices[0].delta
+                    finish_reason= chunk.choices[0].finish_reason
+
+                    # ── Content token ─────────────────────────────────────────
+                    if delta.content:
+                        accumulated_content += delta.content
+                        yield _sse({"type": "token", "content": delta.content})
+
+                    # ── Tool call delta ───────────────────────────────────────
+                    if delta.tool_calls:
+                        for tc_delta in delta.tool_calls:
+                            idx = tc_delta.index
+                            if idx not in accumulated_tool_calls:
+                                accumulated_tool_calls[idx] = {
+                                    "id":        "",
+                                    "name":      "",
+                                    "arguments": "",
+                                }
+                            if tc_delta.id:
+                                accumulated_tool_calls[idx]["id"] += tc_delta.id
+                            if tc_delta.function:
+                                if tc_delta.function.name:
+                                    accumulated_tool_calls[idx]["name"] += tc_delta.function.name
+                                if tc_delta.function.arguments:
+                                    accumulated_tool_calls[idx]["arguments"] += tc_delta.function.arguments
+
+            except Exception as exc:
+                logger.warning("OpenAI API call failed (%s). Falling back to Sheba AI knowledge engine.", exc)
+                async for chunk in _fallback_chat_stream(messages):
+                    yield chunk
+                return
+
+            # ── No tool calls → streaming finished ───────────────────────────
+            if not accumulated_tool_calls:
+                yield _sse({"type": "done", "tokens": total_tokens})
+                yield "data: [DONE]\n\n"
+                return
+
+            # ── Execute tools, then continue to next round ────────────────────
+            # Reconstruct the assistant message with tool_calls
+            tool_calls_list = [
+                {
+                    "id":   tc["id"],
+                    "type": "function",
+                    "function": {"name": tc["name"], "arguments": tc["arguments"]},
+                }
+                for tc in accumulated_tool_calls.values()
+            ]
+            working_messages.append({
+                "role":       "assistant",
+                "content":    accumulated_content or None,
+                "tool_calls": tool_calls_list,
+            })
+
+            import asyncio
+            tool_tasks = [
+                _execute_tool(tc["name"], tc["arguments"], tc["id"])
+                for tc in accumulated_tool_calls.values()
+            ]
+
+            # Signal each tool call to the frontend
+            for tc in accumulated_tool_calls.values():
+                yield _sse({"type": "tool", "name": tc["name"], "status": "calling"})
+
+            results = await asyncio.gather(*tool_tasks, return_exceptions=True)
+
+            for tc, result in zip(accumulated_tool_calls.values(), results):
+                if isinstance(result, Exception):
+                    content = json.dumps({"error": str(result)})
+                else:
+                    content = result
+                working_messages.append({
+                    "role":         "tool",
+                    "tool_call_id": tc["id"],
+                    "content":      content,
+                })
+                yield _sse({"type": "tool", "name": tc["name"], "status": "done"})
+
+        # Fallback after too many rounds
+        yield _sse({"type": "error", "message": "Reached maximum reasoning steps."})
+        yield "data: [DONE]\n\n"
+
+
+# ── Module-level singleton ────────────────────────────────────────────────────
+_service_instance: Optional[OpenAIService] = None
+
+
+def get_openai_service() -> OpenAIService:
+    """Return a lazily-created module-level singleton."""
+    global _service_instance
+    if _service_instance is None:
+        _service_instance = OpenAIService()
+    return _service_instance
+
+
+# ── Private helpers ───────────────────────────────────────────────────────────
+
+async def _execute_tool(name: str, arguments: str, call_id: str) -> str:
+    """Thin wrapper around dispatch_tool with unified error handling."""
+    try:
+        return await dispatch_tool(name, arguments)
+    except Exception as exc:
+        logger.error("Tool %r failed (call_id=%s): %s", name, call_id, exc)
+        raise
+
+
+def _sse(payload: Dict[str, Any]) -> str:
+    """Serialise a dict as a single SSE data line."""
+    return f"data: {json.dumps(payload, ensure_ascii=False)}\n\n"
+
+
+def _classify_error(exc: Exception) -> str:
+    """Return a user-facing error message based on exception type."""
+    if isinstance(exc, RateLimitError):
+        return "The AI service is currently busy. Please wait a moment and try again."
+    if isinstance(exc, APITimeoutError):
+        return "The request timed out. Please try again."
+    if isinstance(exc, APIConnectionError):
+        return "Could not reach the AI service. Please check your connection."
+    return "An unexpected error occurred."
+
+
+async def _fallback_chat_stream(messages: List[Dict[str, str]]) -> AsyncGenerator[str, None]:
+    """Generates intelligent fallback responses for ShebaBD queries when live OpenAI API is unavailable."""
+    import asyncio
+    last_msg = ""
+    for m in reversed(messages):
+        if m.get("role") == "user":
+            last_msg = m.get("content", "").lower()
+            break
+
+    if any(w in last_msg for w in ["date", "time", "today", "তারিখ", "সময়", "আজ"]):
+        now_str = datetime.datetime.now().strftime("%A, %B %d, %Y (%I:%M %p)")
+        resp = f"📅 **Today's Date & Time:** {now_str}"
+    elif any(w in last_msg for w in ["blood", "রক্ত", "donor"]):
+        resp = "🩸 **ShebaBD Blood Donor Network**\n\nYou can search for active blood donors across 64 districts in Bangladesh on our **Blood Donation Portal**. Urgent blood requests for A+, O-, B+, and AB+ are updated in real-time.\n\n📞 **Emergency Hotline**: `999` / `+880-1700000000`"
+    elif any(w in last_msg for w in ["ngo", "organization", "সংগঠন"]):
+        resp = "🏢 **Verified NGO Directory**\n\nShebaBD hosts verified non-governmental organisations including BRAC, Bidyanondo, Jaago Foundation, and Red Crescent. Our AI Trust Score algorithm evaluates registration & audit records to keep donors safe."
+    elif any(w in last_msg for w in ["volunteer", "স্বেচ্ছাসেবক", "event"]):
+        resp = "🤝 **Volunteer Opportunities**\n\nJoin over 18,000 active volunteers across Bangladesh! Current programs include:\n• Sylhet & Sunamganj Relief Medical Camps\n• Coastal Reforestation Drive (Satkhira)\n• Youth Education & Digital Literacy"
+    elif any(w in last_msg for w in ["emergency", "disaster", "flood", "দুর্যোগ", "বন্যা"]):
+        resp = "🚨 **Bangladesh Emergency Response**\n\n• **National Emergency**: `999`\n• **Disaster Early Warning**: `1090`\n• **Fire Service**: `102` / `+880-2-9555555`\n• **Red Crescent Helpline**: `+880-2-48310188`"
+    else:
+        resp = "Hello! I am **Sheba AI** 🤝 — your official assistant for ShebaBD. I can help you find verified NGOs, connect with blood donors, locate volunteer events, and access emergency relief contacts in Bangladesh. How can I help you today?"
+
+    words = resp.split(" ")
+    for word in words:
+        yield f"data: {json.dumps({'type': 'token', 'content': word + ' '}, ensure_ascii=False)}\n\n"
+        await asyncio.sleep(0.02)
+
+    yield f"data: {json.dumps({'type': 'done', 'tokens': len(words)})}\n\n"
+    yield "data: [DONE]\n\n"
+

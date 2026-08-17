@@ -1,33 +1,22 @@
 import { useState } from 'react';
 import { motion } from 'framer-motion';
+import { useNavigate } from 'react-router-dom';
 import {
-  Users,
-  Star,
-  MapPin,
-  Award,
-  Clock,
-  Zap,
-  ShieldCheck,
-  Download,
-  Search,
-  UserPlus,
-  BadgeCheck,
-  Heart,
-  BookOpen,
-  Stethoscope,
-  Code2,
-  Megaphone,
-  Truck,
+  Users, Star, MapPin, Award, Clock, Zap, ShieldCheck, Download,
+  Search, UserPlus, BadgeCheck, Heart, BookOpen, Stethoscope, Code2, Megaphone, Truck, Loader2, AlertCircle,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { TextInput, PasswordInput } from '@/components/ui/input';
 import { SearchInput } from '@/components/ui/input';
+import { authApi } from '@/services/authApi';
+import { ROUTES } from '@/constants/routes';
+import type { Variants } from 'framer-motion';
 
-const fadeUp = {
+const fadeUp: Variants = {
   hidden: { opacity: 0, y: 20 },
   show: (i = 0) => ({
     opacity: 1, y: 0,
-    transition: { delay: i * 0.07, duration: 0.4, ease: [0.4, 0, 0.2, 1] },
+    transition: { delay: i * 0.07, duration: 0.4 },
   }),
 };
 
@@ -65,11 +54,14 @@ type RegistrationForm = {
 };
 
 export default function Volunteers() {
+  const navigate = useNavigate();
   const [activeSkill, setActiveSkill] = useState('all');
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<RegistrationForm>({ name: '', email: '', phone: '', district: '', password: '' });
   const [submitted, setSubmitted] = useState(false);
+  const [submitting, setSubmitting] = useState(false);
+  const [formError, setFormError] = useState<string | null>(null);
 
   const filtered = VOLUNTEERS.filter((v) => {
     const matchSkill = activeSkill === 'all' || v.skill === activeSkill;
@@ -77,9 +69,28 @@ export default function Volunteers() {
     return matchSkill && matchSearch;
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setSubmitted(true);
+    setSubmitting(true);
+    setFormError(null);
+    try {
+      await authApi.register({
+        name: form.name,
+        email: form.email,
+        password: form.password,
+        role: 'volunteer',
+      });
+      setSubmitted(true);
+    } catch (err: any) {
+      const status = err?.response?.status;
+      if (status === 409) {
+        setFormError('An account with this email already exists. Try signing in.');
+      } else {
+        setFormError(err?.response?.data?.detail || 'Registration failed. Please try again.');
+      }
+    } finally {
+      setSubmitting(false);
+    }
   };
 
   return (
@@ -150,12 +161,17 @@ export default function Volunteers() {
                 <p className="text-sm text-ds-muted max-w-sm">
                   Welcome to ShebaBD! Our AI will match you with the best volunteer opportunities. Check your email to verify your account.
                 </p>
-                <Button variant="outline" onClick={() => { setSubmitted(false); setShowForm(false); }}>
-                  Browse Volunteers
-                </Button>
+                <Button onClick={() => navigate(ROUTES.PROFILE)}>Go to Profile</Button>
               </div>
             ) : (
-              <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+              <>
+                {formError && (
+                  <div className="rounded-ds-lg border border-ds-danger/30 bg-ds-danger/5 p-3 flex items-start gap-2 mb-4">
+                    <AlertCircle size={16} className="text-ds-danger mt-0.5 shrink-0" />
+                    <p className="text-sm text-ds-danger flex-1">{formError}</p>
+                  </div>
+                )}
+                <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-5 sm:grid-cols-2">
                 <TextInput
                   label="Full Name"
                   placeholder="Your full name"
@@ -232,14 +248,18 @@ export default function Volunteers() {
                   />
                 </div>
                 <div className="sm:col-span-2 flex gap-3">
-                  <Button type="submit" leftIcon={UserPlus}>
-                    Complete Registration
+                  <Button type="submit" leftIcon={submitting ? Loader2 : UserPlus} disabled={submitting}>
+                    {submitting ? 'Creating Account…' : 'Complete Registration'}
                   </Button>
-                  <Button type="button" variant="ghost" onClick={() => setShowForm(false)}>
+                  <Button type="button" variant="ghost" onClick={() => { setShowForm(false); setFormError(null); }} disabled={submitting}>
                     Cancel
                   </Button>
                 </div>
               </form>
+                </>
+              
+                </>
+              
             )}
           </motion.section>
         )}

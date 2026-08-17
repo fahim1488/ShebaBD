@@ -11,6 +11,20 @@ export const ROUTES = {
   AI_REVIEW_DETECTION: '/ai-review-detection',
   AI_CONTENT_GENERATOR: '/ai-content-generator',
   AI_SMART_SEARCH: '/ai-smart-search',
+  AI_DONATION_ADVISOR: '/ai-donation-advisor',
+  AI_ANALYTICS: '/ai-analytics',
+  DISASTER_INTELLIGENCE: '/disaster-intelligence',
+  COMMUNITY: '/community',
+  AI_VOLUNTEER_RECOMMENDATION: '/ai-volunteer-recommendation',
+  AI_ORG_RECOMMENDATION: '/ai-org-recommendation',
+  AI_ORG_TRUST_SCORE: '/ai-org-trust-score',
+  PROFILE: '/profile',
+  DONATION_HISTORY: '/donations/history',
+  DONATION_TRACKING: '/donations/:id/track',
+  DONATION_TRACKING_BASE: '/donations',
+  DONATION_ANALYTICS: '/donations/analytics',
+  SIGN_IN: '/sign-in',
+  SIGN_UP: '/sign-up',
 } as const;
 
 export type AppRoute = (typeof ROUTES)[keyof typeof ROUTES];

@@ -1,115 +1,183 @@
-# ShebaBD
+# ShebaBD — AI-Powered Social Service Platform
 
-**An AI-Powered Social Service & Volunteer Management Platform for Bangladesh**
-
-ShebaBD connects citizens, volunteers, NGOs, and emergency responders on a single platform — using AI to make volunteering, donations, and emergency response faster and more transparent.
+An AI-powered social service, volunteer management, and emergency response platform for Bangladesh connecting citizens, volunteers, NGOs, and responders with live AI chat, tool calling, and disaster intelligence.
 
 ---
 
-## About
+## 🏗️ Project Architecture & Directory Structure
 
-Bangladesh has thousands of NGOs and volunteer groups, but they mostly work separately using Facebook pages, personal contacts, and manual systems. This makes it hard for people to find verified organizations, request emergency help, or start volunteering.
-
-ShebaBD solves this by bringing everyone onto one platform, with AI features that recommend opportunities, prioritize emergencies, detect fake organizations, and track real impact.
-
----
-
-## Problem
-
-- No centralized platform for NGOs and volunteers
-- Hard to find verified organizations during emergencies
-- Volunteer recruitment is manual and slow
-- Little transparency in NGO activities
-- Poor emergency response coordination
-- Fake organizations and misleading information
-- No smart recommendations or impact tracking
-
----
-
-## User Roles
-
-**General User**
-Discover NGOs, search by map, register as a volunteer, submit emergency requests, donate, join events, chat with AI assistant.
-
-**Volunteer**
-Build a profile, list skills, get AI-matched opportunities, track hours, earn badges and certificates.
-
-**Organization Admin**
-Manage org profile, post events and campaigns, recruit volunteers, track donations, view analytics.
-
-**Super Admin**
-Verify organizations, manage users, monitor emergencies, moderate content, oversee fraud detection.
-
----
-
-## Core Features
-
-**Organization Discovery**
-District and category search, map with GPS, verified profiles, ratings and reviews.
-
-**Volunteer Management**
-Skill-based profiles, hour tracking, digital portfolio, QR volunteer ID, certificates.
-
-**Event Management**
-Event creation, online registration, attendance tracking, AI event suggestions.
-
-**Emergency Response**
-Emergency requests with AI priority levels, blood donor matching, shelter/hospital finder, emergency broadcast.
-
-**Donations**
-Transparent donation dashboard, donation history, AI donation advisor with impact estimation.
-
-**Community**
-Awareness blogs, discussion forums, campaigns, volunteer stories.
-
----
-
-## AI Features
-
-- **AI Social Assistant** — bilingual (Bangla + English) help and navigation
-- **Volunteer Recommendation Engine** — matches volunteers to the right opportunities
-- **Blood Donor Matching** — finds nearby compatible donors
-- **Emergency Prioritization** — classifies urgency as Critical, High, Medium, or Low
-- **Organization Recommendation** — suggests NGOs based on interests
-- **Trust Score** — rates organization credibility
-- **Fake NGO & Review Detection** — flags suspicious organizations and spam reviews
-- **Smart Search** — natural language search, e.g. "I need O+ blood in Dhaka urgently"
-- **Donation Advisor** — shows the real-world impact of a donation
-- **Content Generator** — writes awareness posts and campaign copy
-- **Analytics & Reports** — auto-generates impact and performance summaries
-- **Disaster Intelligence Dashboard** — monitors disasters and affected areas
-
----
-
-## Tech Stack
-
-**Frontend:** React.js, Vite, Tailwind CSS, DaisyUI, React Router, Axios, React Hook Form, Framer Motion, Leaflet.js, OpenStreetMap
-
-**Backend:** Node.js, Express.js, MongoDB Atlas, Mongoose, JWT, Firebase Authentication, Bcrypt, Cloudinary, Nodemailer
-
-**AI:** Claude API, NLP, Recommendation Engine, Smart Analytics, Content Generation, Fraud Detection
-
-**Deployment:** Vercel, Render, GitHub, MongoDB Atlas
+```
+ShebaBD123/
+├── backend/                        # FastAPI Backend Application (Python 3.12)
+│   ├── alembic/                    # Database Migration System
+│   │   ├── versions/               # Schema Migration Scripts
+│   │   └── env.py                  # Migration Environment Config
+│   ├── app/                        # Main Application Package
+│   │   ├── api/                    # API Route Controllers
+│   │   │   ├── auth.py             # Authentication endpoints (/api/v1/auth/*)
+│   │   │   └── chat.py             # Chat & Health endpoints (/api/v1/chat/* & /api/v1/health)
+│   │   ├── config.py               # Application Settings & Pydantic Config
+│   │   ├── database.py             # SQLAlchemy Async Engine & Session Manager
+│   │   ├── main.py                 # FastAPI Application Factory, CORS & Middlewares
+│   │   ├── models.py               # ORM Models (User, Conversation, Message)
+│   │   ├── schemas.py              # Pydantic Validation & Serialization Schemas
+│   │   ├── utils.py                # Security, JWT tokens, and logging helpers
+│   │   └── services/               # Core Services
+│   │       ├── memory.py           # Database CRUD for chat history & memory
+│   │       ├── openai_service.py   # GPT-4o Service & SSE Streaming Generator
+│   │       └── tools.py            # Agentic Tool Definitions (Search, Org lookup, Emergency)
+│   ├── alembic.ini                 # Alembic configuration
+│   ├── requirements.txt            # Python Dependencies
+│   └── shebabd.db                  # Local SQLite Database Fallback
+│
+├── public/                         # Public Assets
+├── src/                            # React 18 + Vite + TypeScript Frontend
+│   ├── assets/                     # Media & Static Image Assets
+│   ├── components/                 # Reusable UI Components
+│   │   ├── common/                 # Headers, Footers, Modals, Cards
+│   │   ├── forms/                  # Input fields, selectors, form controls
+│   │   ├── layout/                 # Main containers, Navbars, Sidebars
+│   │   └── ui/                     # UI Primitives & Atoms
+│   ├── constants/                  # System constants & app config
+│   ├── context/                    # React Contexts (AuthContext, ThemeContext, LanguageContext)
+│   ├── data/                       # Datasets for NGOs, volunteers, disaster alerts
+│   ├── hooks/                      # Custom React Hooks
+│   ├── i18n/                       # Translation Dictionaries (English / Bengali)
+│   ├── layouts/                    # Layout wrappers
+│   ├── pages/                      # Page Views & Dashboards
+│   │   ├── About.tsx               # About ShebaBD
+│   │   ├── AiAnalytics.tsx         # AI Insights & Impact Analytics
+│   │   ├── AiContentGenerator.tsx  # AI Content Generation tool
+│   │   ├── AiDisasterIntelligence.tsx # Emergency disaster management & alert system
+│   │   ├── AiDonationAdvisor.tsx   # Smart donation advisor
+│   │   ├── AiFakeNgoDetection.tsx  # NGO authenticity detection engine
+│   │   ├── AiFakeReviewDetection.tsx# Review credibility checker
+│   │   ├── AiOrgRecommendation.tsx # NGO matching engine
+│   │   ├── AiOrgTrustScore.tsx     # Trust score analyzer
+│   │   ├── AiSmartSearch.tsx       # Semantic AI search
+│   │   ├── AiVolunteerRecommendation.tsx # Volunteer opportunity matchmaker
+│   │   ├── BloodDonation.tsx       # Blood donation locator & donor finder
+│   │   ├── Community.tsx           # Community forums & stories
+│   │   ├── Donate.tsx              # Donation portal
+│   │   ├── Emergency.tsx           # Emergency contacts & SOS alert directory
+│   │   ├── Events.tsx              # Campaigns & events manager
+│   │   ├── Home.tsx                # Landing Homepage
+│   │   ├── Organizations.tsx      # Verified NGO Directory
+│   │   ├── SignIn.tsx              # User Authentication (Login)
+│   │   ├── SignUp.tsx              # User Account Registration
+│   │   └── Volunteers.tsx         # Volunteer Directory & Opportunities
+│   ├── routes/                     # Application Routes & Guards
+│   ├── services/                   # Frontend API Client Layer
+│   │   ├── api.ts                  # Axios base client with Bearer Token Interceptor
+│   │   ├── authApi.ts              # Authentication API Service
+│   │   └── chatApi.ts              # Chat API Service (Fetch API + SSE Streaming)
+│   ├── styles/                     # Global CSS & Tailwind imports
+│   ├── types/                      # TypeScript Interfaces & Type Declarations
+│   ├── App.tsx                     # Application Root & Routing Setup
+│   └── main.tsx                    # React DOM Mounting Entrypoint
+│
+├── package.json                    # Node dependencies & package scripts
+├── tailwind.config.ts              # Tailwind CSS configuration
+├── tsconfig.json                   # TypeScript configuration
+└── vite.config.ts                  # Vite build configuration
+```
 
 ---
 
-## Security
+## 🔌 API Endpoint Documentation
 
-JWT & Firebase Authentication, Role-Based Access Control, Password Encryption, Protected Routes, Input Validation, Secure Image Upload, Rate Limiting, AI Fraud Detection
+Base API URL: `http://localhost:8000/api/v1`
+
+### 1. Authentication APIs (`/api/v1/auth`)
+
+| Endpoint | Method | Protected | Description | Request Body | Response |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `/api/v1/auth/register` | `POST` | ❌ No | Register a new user account | `RegisterRequest` | `AuthResponse` |
+| `/api/v1/auth/login` | `POST` | ❌ No | Authenticate user with credentials | `LoginRequest` | `AuthResponse` |
+| `/api/v1/auth/social` | `POST` | ❌ No | Sign in / register via Google or Facebook | `SocialLoginRequest` | `AuthResponse` |
+| `/api/v1/auth/forgot-password` | `POST` | ❌ No | Send password reset instructions | `ForgotPasswordRequest` | `{ ok: true, message: string }` |
+| `/api/v1/auth/logout` | `POST` | ❌ No | Logout user session | None | `{ ok: true, message: string }` |
+| `/api/v1/auth/me` | `GET` | 🔒 Bearer | Get authenticated user profile | None | `UserOut` |
+
+#### Request & Response Schemas:
+
+* **`RegisterRequest`**: `{ name: string, email: string, password: string, role?: "user" | "volunteer" | "ngo" }`
+* **`LoginRequest`**: `{ email: string, password: string }`
+* **`AuthResponse`**: `{ token: string, user: { id: string, name: string, email: string, role: string, avatar: string | null } }`
 
 ---
 
-## Expected Outcomes
+### 2. AI Chat & Memory APIs (`/api/v1/chat`)
 
-- Easier access to verified organizations
-- More volunteer participation nationwide
-- Faster emergency response
-- Greater transparency and trust
-- Stronger collaboration between citizens and NGOs
-- Data-driven decisions for organizations
+| Endpoint | Method | Protected | Description | Request / Query Params | Response |
+| :--- | :--- | :--- | :--- | :--- | :--- |
+| `/api/v1/chat` | `POST` | 🔒 Bearer | Single-turn message with automated agent tool-call execution loop | `ChatRequest` | `ChatResponse` |
+| `/api/v1/chat/stream` | `POST` | 🔒 Bearer | Real-time streaming response using Server-Sent Events (SSE) | `ChatStreamRequest` | `text/event-stream` |
+| `/api/v1/chat/new` | `POST` | 🔒 Bearer | Create a new conversation session | `NewConversationRequest` | `NewConversationResponse` |
+| `/api/v1/chat/history` | `GET` | 🔒 Bearer | Get list of user conversations (paginated) | `?limit=20&offset=0` | `ConversationListResponse` |
+| `/api/v1/chat/history/{id}` | `GET` | 🔒 Bearer | Fetch full chat message history | Path: `id` (UUID) | `ConversationDetailSchema` |
+| `/api/v1/chat/history/{id}` | `DELETE` | 🔒 Bearer | Delete conversation and messages | Path: `id` (UUID)<br>`?hard=false` | `OKResponse` |
+
+#### Server-Sent Events (SSE) Format (`POST /api/v1/chat/stream`):
+* Meta Event: `data: {"type": "meta", "conversation_id": "...", "is_new": true}`
+* Token Event: `data: {"type": "token", "content": "Hello"}`
+* Tool Execution: `data: {"type": "tool", "name": "get_ngo_info", "status": "calling|done"}`
+* Stream Completion: `data: {"type": "done", "tokens": 120}`
+* Termination Sentinel: `data: [DONE]`
 
 ---
 
-## Future Scope
+### 3. System Health APIs
 
-Mobile app (Flutter), AI voice assistant, OCR document verification, AI image-based emergency detection, government API integration, SMS emergency requests, blockchain donation tracking, predictive disaster analytics, IoT disaster monitoring, drone-assisted assessment, real-time chat, digital identity verification.
+| Endpoint | Method | Protected | Description | Response |
+| :--- | :--- | :--- | :--- | :--- |
+| `/` | `GET` | ❌ No | Root server status | `{"service": "ShebaBD AI Backend", "version": "1.0.0", "status": "running"}` |
+| `/api/v1/health` | `GET` | ❌ No | Health check for Database & OpenAI status | `HealthResponse` |
+
+---
+
+## 🛠️ Getting Started & Running Locally
+
+### Backend Setup (FastAPI)
+
+```bash
+cd backend
+python -m venv .venv
+# On Windows:
+.venv\Scripts\activate
+# On Linux/macOS:
+source .venv/bin/activate
+
+pip install -r requirements.txt
+uvicorn app.main:app --reload --port 8000
+```
+
+### Frontend Setup (Vite + React)
+
+```bash
+# In the project root directory
+npm install
+npm run dev
+```
+
+---
+
+## ⚙️ Environment Variables
+
+### Backend (`backend/.env`):
+```env
+APP_NAME="ShebaBD AI Backend"
+APP_ENV=development
+DEBUG=True
+SECRET_KEY=your-secret-jwt-key
+DATABASE_URL=sqlite+aiosqlite:///./shebabd.db
+OPENAI_API_KEY=your-openai-api-key
+OPENAI_MODEL=gpt-4o
+ALLOWED_ORIGINS=http://localhost:5173,http://localhost:3000
+```
+
+### Frontend (`.env`):
+```env
+VITE_API_BASE_URL=http://localhost:8000/api/v1
+VITE_BACKEND_URL=http://localhost:8000
+```
