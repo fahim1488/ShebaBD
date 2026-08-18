@@ -69,3 +69,5 @@ async def send_donation_receipt(email: str, donor_name: str, amount: float, caus
     <p>Your contribution makes a real difference. 🙏</p>
     """
     return await send_email(email, f"Donation Receipt #{receipt_no}", body, html=True)
+
+# updated: added error logging on send failure

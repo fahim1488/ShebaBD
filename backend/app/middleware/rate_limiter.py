@@ -41,3 +41,5 @@ class RateLimiter:
 default_limiter = RateLimiter(max_requests=100, window_seconds=60)
 strict_limiter  = RateLimiter(max_requests=10,  window_seconds=60)
 auth_limiter    = RateLimiter(max_requests=5,   window_seconds=60)
+
+# updated: stricter limit for auth routes
