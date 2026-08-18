@@ -75,3 +75,4 @@ async def register_for_event(
     await db.commit()
     await db.refresh(reg)
     return reg
+/* Alif: Events API implementation */ 
