@@ -468,4 +468,4 @@ async def seed_blood_donors(db: AsyncSession) -> int:
 
 
 if __name__ == "__main__":
-    asyncio.run(seed())
+    asyncio.run(seed())/* Fahim: Database seeding */ 
