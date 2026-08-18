@@ -243,3 +243,4 @@ export default function About() {
     </div>
   );
 }
+/* Fahim: Enhanced about page */ 
