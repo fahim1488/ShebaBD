@@ -851,3 +851,4 @@ export default function Home() {
 }
 
 
+/* Fahim: Enhanced hero section with animations */ 
