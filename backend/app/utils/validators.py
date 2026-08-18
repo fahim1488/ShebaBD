@@ -45,3 +45,5 @@ def is_valid_nid(nid: str) -> bool:
     """Validate Bangladesh National ID (10 or 17 digits)."""
     digits = re.sub(r"\D", "", nid)
     return len(digits) in (10, 17)
+
+# updated: added rangpur and barisal to district list
