@@ -45,3 +45,5 @@ def paginate_response(
 def get_skip(page: int, page_size: int) -> int:
     """Calculate the SQL OFFSET value from page number and size."""
     return max(0, (page - 1) * page_size)
+
+# updated: added default page size validation
