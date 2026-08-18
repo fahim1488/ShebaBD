@@ -49,3 +49,5 @@ def generate_random_password(length: int = 16) -> str:
 def generate_reset_token() -> str:
     """Generate a secure URL-safe token for password reset."""
     return secrets.token_urlsafe(32)
+
+# updated: increased bcrypt rounds to 14 for stronger hashing
