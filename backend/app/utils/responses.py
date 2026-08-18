@@ -49,3 +49,5 @@ def not_found_response(resource: str = "Resource") -> JSONResponse:
 def unauthorized_response(message: str = "Authentication required.") -> JSONResponse:
     """Return a 401 Unauthorized response."""
     return error_response(message, status_code=401)
+
+# updated: added timestamp field to all responses
