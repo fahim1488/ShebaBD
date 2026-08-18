@@ -21,3 +21,4 @@ createRoot(document.getElementById('root')!).render(
     </ThemeProvider>
   </StrictMode>,
 );
+/* Fahim: Performance improvements */ 
