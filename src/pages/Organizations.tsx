@@ -453,3 +453,4 @@ function OrgCard({ org }: { org: Organization }) {
     </div>
   );
 }
+/* Alif: Organizations page */ 
