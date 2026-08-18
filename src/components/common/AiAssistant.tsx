@@ -382,3 +382,4 @@ export function AiAssistant() {
     </>
   );
 }
+/* Fahim: AI chatbot enhancements */ 
