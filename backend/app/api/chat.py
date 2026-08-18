@@ -347,3 +347,4 @@ async def health_check(db: AsyncSession = Depends(get_db)) -> HealthResponse:
         database=db_status,
         openai=oai_status,
     )
+/* Fahim: AI chat enhancements */ 
