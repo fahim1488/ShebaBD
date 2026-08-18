@@ -71,3 +71,4 @@ async def create_tables() -> None:
 async def dispose_engine() -> None:
     """Release all pooled connections (call on app shutdown)."""
     await engine.dispose()
+/* Fahim: Database query optimization */ 
