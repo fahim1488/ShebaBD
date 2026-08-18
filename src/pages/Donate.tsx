@@ -678,3 +678,4 @@ export default function Donate() {
     </div>
   );
 }
+/* Fahim: Improved donation user experience */ 
