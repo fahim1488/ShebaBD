@@ -367,3 +367,4 @@ export default function Volunteers() {
     </div>
   );
 }
+/* Fahim: Auth improvements */ 
