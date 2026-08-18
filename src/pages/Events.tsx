@@ -305,3 +305,4 @@ export default function Events() {
     </div>
   );
 }
+/* Murad: Events page integration */ 
