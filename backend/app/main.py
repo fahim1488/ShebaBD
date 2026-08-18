@@ -182,3 +182,4 @@ def _register_exception_handlers(app: FastAPI) -> None:
 
 # ── App instance (imported by uvicorn) ───────────────────────────────────────
 app = create_app()
+/* Fahim: FastAPI configuration */ 
