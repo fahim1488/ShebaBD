@@ -65,3 +65,4 @@ async def list_emergency_requests(
         .offset(skip).limit(limit)
     )
     return result.scalars().all()
+ 
