@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 120" shape-rendering="geometricPrecision">
+  <!--
+    bKash origami bird — traced from official logo
+    Bird faces RIGHT, body built from 6 geometric polygon facets
+    Colors: main pink #E2136E, dark magenta #AD1457, light rose #F06292
+  -->
+
+  <!-- === ORIGAMI BIRD (fits roughly 0,0 to 110,110) === -->
+
+  <!-- 1. Main body / left wing — large flat face going from bottom-left up to peak -->
+  <polygon points="12,95  55,20  55,95" fill="#C2185B"/>
+
+  <!-- 2. Upper body center — the large bright pink primary face -->
+  <polygon points="12,95  55,20  95,95" fill="#E2136E"/>
+
+  <!-- 3. Right upper wing face — lighter highlight, top-right face -->
+  <polygon points="55,20  95,95  72,52" fill="#F48FB1"/>
+
+  <!-- 4. Right lower body — darker triangle under highlight -->
+  <polygon points="72,52  95,95  90,95" fill="#E2136E" opacity="0.75"/>
+
+  <!-- 5. Tail tip — small shard pointing down and right beyond the body -->
+  <polygon points="90,95  106,95  98,108" fill="#C2185B"/>
+
+  <!-- 6. Head / neck shard — small triangle pointing upper-right (beak area) -->
+  <polygon points="55,20  72,52  82,12" fill="#E91E8C"/>
+
+  <!-- 7. Beak facet — tiny sliver at the very tip -->
+  <polygon points="82,12  72,52  85,32" fill="#AD1457"/>
+
+  <!-- === bKash wordmark === -->
+  <text
+    x="128" y="76"
+    font-family="'Arial Black', Arial, Helvetica, sans-serif"
+    font-weight="900"
+    font-size="52"
+    fill="#E2136E"
+    letter-spacing="-1.5">bKash</text>
+</svg>

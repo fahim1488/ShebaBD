@@ -15,39 +15,73 @@ import {
   AlertCircle,
 } from 'lucide-react';
 
-/* ── Payment provider logos ──────────────────────────────────────────────── */
+/* ── Payment provider logos — local image assets ─────────────────────────── */
+
 const BkashLogo = () => (
-  <svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" className="h-8 w-auto">
-    <rect width="120" height="40" rx="6" fill="#E2136E"/>
-    <text x="10" y="27" fontFamily="Arial, sans-serif" fontWeight="900" fontSize="20" fill="white" letterSpacing="-0.5">bKash</text>
-    <circle cx="104" cy="20" r="10" fill="white" opacity="0.15"/>
-    <path d="M99 20 Q104 13 109 20 Q104 27 99 20Z" fill="white" opacity="0.9"/>
-  </svg>
+  <div className="flex items-center gap-2.5">
+    <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#E2136E] via-[#D12053] to-[#990033] shadow-md shadow-pink-500/25 ring-1 ring-pink-400/40">
+      <svg viewBox="0 0 24 24" className="h-6 w-6 fill-white drop-shadow">
+        <path d="M2.5 12L12 2.5L21.5 12L12 21.5L2.5 12Z" fill="none" stroke="white" strokeWidth="1.5" opacity="0.3" />
+        <path d="M12 3.5L4 12L12 17.5L20 12L12 3.5Z" fill="white" />
+        <path d="M12 6.5L7 12L12 15L17 12L12 6.5Z" fill="#E2136E" />
+      </svg>
+    </div>
+    <div className="flex flex-col">
+      <div className="flex items-center gap-1.5">
+        <span className="font-display text-base font-black tracking-tight text-ds-foreground">
+          bKash
+        </span>
+        <span className="rounded bg-pink-500/10 px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase text-pink-500 border border-pink-500/20">
+          Fast Pay
+        </span>
+      </div>
+      <span className="text-[10px] font-medium text-ds-muted">bKash Mobile Wallet</span>
+    </div>
+  </div>
 );
 
 const NagadLogo = () => (
-  <svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" className="h-8 w-auto">
-    <rect width="120" height="40" rx="6" fill="#F15A24"/>
-    <circle cx="20" cy="20" r="12" fill="white" opacity="0.2"/>
-    <circle cx="20" cy="20" r="7" fill="white" opacity="0.9"/>
-    <circle cx="20" cy="20" r="3" fill="#F15A24"/>
-    <text x="38" y="27" fontFamily="Arial, sans-serif" fontWeight="900" fontSize="19" fill="white" letterSpacing="-0.3">nagad</text>
-  </svg>
+  <div className="flex items-center gap-2.5">
+    <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#F73E1E] via-[#E62E05] to-[#B31D00] shadow-md shadow-orange-500/25 ring-1 ring-orange-400/40">
+      <svg viewBox="0 0 24 24" className="h-6 w-6 text-white" fill="currentColor">
+        <path d="M12 2C12 2 14.5 5.5 14.5 8C14.5 9.5 13.5 10.5 12 10.5C10.5 10.5 9.5 9.5 9.5 8C9.5 5.5 12 2 12 2Z" fill="white" opacity="0.9"/>
+        <path d="M12 7C14.5 10.5 18 12.5 18 16C18 19.31 15.31 22 12 22C8.69 22 6 19.31 6 16C6 12.5 9.5 10.5 12 7Z" fill="white"/>
+        <circle cx="12" cy="16" r="3" fill="#E62E05"/>
+      </svg>
+    </div>
+    <div className="flex flex-col">
+      <div className="flex items-center gap-1.5">
+        <span className="font-display text-base font-black tracking-tight text-ds-foreground">
+          Nagad
+        </span>
+        <span className="rounded bg-orange-500/10 px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase text-orange-500 border border-orange-500/20">
+          নগদ
+        </span>
+      </div>
+      <span className="text-[10px] font-medium text-ds-muted">Instant Digital Pay</span>
+    </div>
+  </div>
 );
 
 const BankLogo = () => (
-  <svg viewBox="0 0 120 40" xmlns="http://www.w3.org/2000/svg" className="h-8 w-auto">
-    <rect width="120" height="40" rx="6" fill="#1A56DB"/>
-    {/* building columns */}
-    <rect x="10" y="14" width="4" height="14" rx="1" fill="white" opacity="0.9"/>
-    <rect x="17" y="14" width="4" height="14" rx="1" fill="white" opacity="0.9"/>
-    <rect x="24" y="14" width="4" height="14" rx="1" fill="white" opacity="0.9"/>
-    {/* roof */}
-    <polygon points="8,14 22,6 36,14" fill="white" opacity="0.9"/>
-    {/* base */}
-    <rect x="8" y="28" width="26" height="3" rx="1" fill="white" opacity="0.9"/>
-    <text x="42" y="27" fontFamily="Arial, sans-serif" fontWeight="700" fontSize="13" fill="white" letterSpacing="0">Bank Transfer</text>
-  </svg>
+  <div className="flex items-center gap-2.5">
+    <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#1E3A8A] via-[#2563EB] to-[#1D4ED8] shadow-md shadow-blue-500/25 ring-1 ring-blue-400/40">
+      <svg viewBox="0 0 24 24" className="h-6 w-6 text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <path d="M3 21h18M3 10h18M5 10v11M9 10v11M15 10v11M19 10v11M12 3L2 8h20l-10-5z" />
+      </svg>
+    </div>
+    <div className="flex flex-col">
+      <div className="flex items-center gap-1.5">
+        <span className="font-display text-base font-black tracking-tight text-ds-foreground">
+          Bank Pay
+        </span>
+        <span className="rounded bg-blue-500/10 px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase text-blue-500 border border-blue-500/20">
+          EFT / Online
+        </span>
+      </div>
+      <span className="text-[10px] font-medium text-ds-muted">Direct Bank Transfer</span>
+    </div>
+  </div>
 );
 import { Button } from '@/components/ui/button';
 import { TextInput } from '@/components/ui/input';
@@ -55,7 +89,7 @@ import { BkashPayment } from '@/components/payment/BkashPayment';
 import { NagadPayment } from '@/components/payment/NagadPayment';
 import { BankTransferPayment } from '@/components/payment/BankTransferPayment';
 import { DonationConfirmation } from '@/components/common/DonationConfirmation';
-import { usePaymentMethods, useDonationForm, useDonations } from '@/hooks/useDonations';
+import { useDonationForm, useDonations } from '@/hooks/useDonations';
 import { useAuth } from '@/hooks/useAuth';
 import {
   DonationCause,
@@ -162,7 +196,6 @@ const PAYMENT_PROVIDERS = [
 export default function Donate() {
   const { user } = useAuth();
   const navigate = useNavigate();
-  const { paymentMethods, loading: paymentMethodsLoading } = usePaymentMethods();
   const { isSubmitting, errors, success, submitDonation, resetForm } = useDonationForm();
   const { verifyPayment } = useDonations();
   
@@ -252,7 +285,6 @@ export default function Donate() {
   };
 
   const totalRaised = CAUSES.reduce((s, c) => s + c.raised, 0);
-  const availablePaymentMethods = paymentMethods.filter(method => method.is_active);
 
   // Show bKash payment processing
   if (currentStep === 'payment' && createdDonation && form.payment_provider === PaymentProvider.BKASH) {
@@ -380,24 +412,27 @@ export default function Donate() {
 
   // Main donation form
   return (
-    <div className="min-h-screen bg-ds-background">
+    <div style={{ background: '#0B2E22', color: '#F7F1E1' }} className="min-h-screen">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <section className="bg-gradient-to-br from-ds-primary/5 via-ds-background to-ds-warning/5 py-14">
+      <section 
+        style={{ background: 'linear-gradient(135deg, #0B2E22 0%, #0F3A2B 50%, #0B2E22 100%)' }}
+        className="py-14 border-b border-[rgba(247,241,225,0.12)]"
+      >
         <div className="mx-auto max-w-7xl px-4 md:px-8">
           <motion.div variants={fadeUp} initial="hidden" animate="show" className="max-w-2xl">
-            <span className="mb-3 inline-flex items-center gap-2 rounded-ds-full border border-ds-primary/20 bg-ds-primary/10 px-3 py-1 text-xs font-medium text-ds-primary">
+            <span className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#E7A93B]/30 bg-[#E7A93B]/10 px-3.5 py-1 text-xs font-medium text-[#E7A93B] backdrop-blur-md">
               <HandHeart size={12} /> Donation Platform
             </span>
-            <h1 className="font-display text-3xl font-bold text-ds-foreground md:text-4xl">
+            <h1 className="font-display text-3xl font-bold text-[#F7F1E1] md:text-4xl tracking-tight">
               Give the Gift of Change
             </h1>
-            <p className="mt-3 text-ds-muted">
+            <p className="mt-3 text-[rgba(247,241,225,0.75)] leading-relaxed">
               100% of your donation reaches verified organisations. Full transparency, AI-powered impact tracking.
             </p>
-            <div className="mt-5 flex items-center gap-3 text-sm text-ds-muted">
-              <span className="flex items-center gap-1.5"><ShieldCheck size={14} className="text-ds-primary" />Secure Payment</span>
-              <span className="flex items-center gap-1.5"><Zap size={14} className="text-ds-warning" />AI Impact Tracking</span>
-              <span className="flex items-center gap-1.5"><Heart size={14} className="text-ds-danger" />Verified Orgs Only</span>
+            <div className="mt-5 flex items-center gap-4 text-sm text-[rgba(247,241,225,0.7)]">
+              <span className="flex items-center gap-1.5"><ShieldCheck size={14} className="text-[#3E7A8C]" />Secure Payment</span>
+              <span className="flex items-center gap-1.5"><Zap size={14} className="text-[#E7A93B]" />AI Impact Tracking</span>
+              <span className="flex items-center gap-1.5"><Heart size={14} className="text-[#D6472C]" />Verified Orgs Only</span>
             </div>
           </motion.div>
         </div>
@@ -407,23 +442,23 @@ export default function Donate() {
         <div className="grid grid-cols-1 gap-10 lg:grid-cols-3">
           {/* ── Causes ───────────────────────────────────────────────────────── */}
           <div className="lg:col-span-1 space-y-5">
-            <div className="rounded-ds-xl border border-ds-muted/10 bg-ds-surface p-5 shadow-ds-sm">
-              <h2 className="font-display text-lg font-bold text-ds-foreground mb-1">Total Raised</h2>
-              <p className="font-display text-3xl font-bold text-ds-primary">৳{(totalRaised / 100000).toFixed(1)}L</p>
-              <p className="text-xs text-ds-muted mt-1">Across all active causes</p>
+            <div style={{ background: '#0F3A2B', borderColor: 'rgba(247,241,225,0.14)' }} className="rounded-2xl border p-5 shadow-xl">
+              <h2 className="font-display text-lg font-bold text-[#F7F1E1] mb-1">Total Raised</h2>
+              <p className="font-display text-3xl font-bold text-[#E7A93B]">৳{(totalRaised / 100000).toFixed(1)}L</p>
+              <p className="text-xs text-[rgba(247,241,225,0.65)] mt-1">Across all active causes</p>
             </div>
 
-            <div className="rounded-ds-xl border border-ds-muted/10 bg-ds-surface p-5 shadow-ds-sm space-y-4">
-              <h2 className="font-display text-lg font-bold text-ds-foreground">Active Causes</h2>
+            <div style={{ background: '#0F3A2B', borderColor: 'rgba(247,241,225,0.14)' }} className="rounded-2xl border p-5 shadow-xl space-y-4">
+              <h2 className="font-display text-lg font-bold text-[#F7F1E1]">Active Causes</h2>
               {CAUSES.map((cause) => (
                 <button
                   key={cause.id}
                   type="button"
                   onClick={() => handleCauseSelect(cause.id)}
-                  className={`w-full rounded-ds-lg border p-3 text-left transition-all duration-ds-fast ${
+                  className={`w-full rounded-xl border p-3 text-left transition-all ${
                     form.cause === cause.id 
-                      ? cause.color + ' ring-2 ring-current ring-offset-1' 
-                      : 'border-ds-muted/10 bg-ds-background hover:border-ds-muted/30'
+                      ? 'border-[#D6472C] bg-[#D6472C]/20 text-[#F7F1E1] ring-2 ring-[#D6472C]' 
+                      : 'border-[rgba(247,241,225,0.12)] bg-[#0B2E22] hover:border-[#E7A93B] text-[rgba(247,241,225,0.8)]'
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-2">
@@ -431,34 +466,34 @@ export default function Donate() {
                     <span className="text-sm font-medium">{cause.label}</span>
                     <span className="ml-auto text-xs opacity-70">{Math.round((cause.raised / cause.goal) * 100)}%</span>
                   </div>
-                  <div className="h-1.5 w-full rounded-full bg-ds-muted/20 overflow-hidden">
-                    <div className="h-full rounded-full bg-current" style={{ width: `${(cause.raised / cause.goal) * 100}%` }} />
+                  <div className="h-1.5 w-full rounded-full bg-[rgba(247,241,225,0.15)] overflow-hidden">
+                    <div className="h-full rounded-full bg-[#E7A93B]" style={{ width: `${(cause.raised / cause.goal) * 100}%` }} />
                   </div>
                   <p className="mt-1.5 text-xs opacity-60">৳{(cause.raised / 1000).toFixed(0)}k of ৳{(cause.goal / 1000).toFixed(0)}k goal</p>
                 </button>
               ))}
               {errors.cause && (
-                <p className="text-xs text-ds-danger">{errors.cause}</p>
+                <p className="text-xs text-red-400">{errors.cause}</p>
               )}
             </div>
           </div>
 
           <div className="lg:col-span-2">
-            <div className="rounded-ds-xl border border-ds-muted/10 bg-ds-surface p-6 shadow-ds-sm md:p-8">
-              <h2 className="font-display text-2xl font-bold text-ds-foreground mb-5">Make a Donation</h2>
+            <div style={{ background: '#0F3A2B', borderColor: 'rgba(247,241,225,0.14)' }} className="rounded-2xl border p-6 shadow-xl md:p-8">
+              <h2 className="font-display text-2xl font-bold text-[#F7F1E1] mb-5">Make a Donation</h2>
 
               {errors.general && (
-                <div className="mb-6 flex items-center gap-2 rounded-ds-lg bg-ds-danger/10 border border-ds-danger/20 p-3">
-                  <AlertCircle size={16} className="text-ds-danger" />
-                  <p className="text-sm text-ds-danger">{errors.general}</p>
+                <div className="mb-6 flex items-center gap-2 rounded-xl bg-red-500/10 border border-red-500/20 p-3.5">
+                  <AlertCircle size={16} className="text-red-400" />
+                  <p className="text-sm text-red-200">{errors.general}</p>
                 </div>
               )}
 
               <form onSubmit={handleSubmit} className="space-y-6">
                 {/* Amount selection */}
                 <div>
-                  <label className="block text-sm font-medium text-ds-foreground mb-2">
-                    Donation Amount (৳) <span className="text-ds-danger">*</span>
+                  <label className="block text-sm font-medium text-[#F7F1E1] mb-2">
+                    Donation Amount (৳) <span className="text-red-400">*</span>
                   </label>
                   <div className="grid grid-cols-3 gap-2 mb-3">
                     {PRESET_AMOUNTS.map((amt) => (
@@ -466,10 +501,10 @@ export default function Donate() {
                         key={amt}
                         type="button"
                         onClick={() => handleAmountSelect(amt)}
-                        className={`rounded-ds-md border py-2.5 text-sm font-semibold transition-colors duration-ds-fast ${
+                        className={`rounded-xl border py-2.5 text-sm font-semibold transition-colors ${
                           form.amount === String(amt) && !customAmount 
-                            ? 'border-ds-primary bg-ds-primary text-white' 
-                            : 'border-ds-muted/20 bg-ds-background text-ds-foreground hover:border-ds-primary/40'
+                            ? 'border-[#D6472C] bg-[#D6472C] text-white shadow-md' 
+                            : 'border-[rgba(247,241,225,0.15)] bg-[#0B2E22] text-[#F7F1E1] hover:border-[#E7A93B]'
                         }`}
                       >
                         ৳{amt}
@@ -479,10 +514,10 @@ export default function Donate() {
                   <button
                     type="button"
                     onClick={() => { setCustomAmount(true); setForm((f) => ({ ...f, amount: '' })); }}
-                    className={`w-full rounded-ds-md border py-2 text-sm font-medium transition-colors duration-ds-fast ${
+                    className={`w-full rounded-xl border py-2 text-sm font-medium transition-colors ${
                       customAmount 
-                        ? 'border-ds-primary text-ds-primary' 
-                        : 'border-ds-muted/20 text-ds-muted hover:border-ds-primary/40'
+                        ? 'border-[#E7A93B] text-[#E7A93B] bg-[#E7A93B]/10' 
+                        : 'border-[rgba(247,241,225,0.15)] text-[rgba(247,241,225,0.7)] hover:border-[#E7A93B]'
                     }`}
                   >
                     Enter custom amount
@@ -523,63 +558,39 @@ export default function Donate() {
                   <label className="block text-sm font-medium text-ds-foreground mb-2">
                     Payment Method <span className="text-ds-danger">*</span>
                   </label>
-                  {paymentMethodsLoading ? (
-                    <div className="flex items-center justify-center p-8">
-                      <Loader2 className="h-6 w-6 animate-spin text-ds-primary" />
-                    </div>
-                  ) : (
-                    <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-                      {PAYMENT_PROVIDERS.map((provider) => {
-                        const method = availablePaymentMethods.find(m => m.provider === provider.provider);
-                        const isSelected = form.payment_provider === provider.provider;
-                        const isDisabled = !method;
-                        
-                        return (
-                          <button
-                            key={provider.provider}
-                            type="button"
-                            disabled={isDisabled}
-                            onClick={() => !isDisabled && handlePaymentMethodSelect(provider.provider)}
-                            className={`relative rounded-ds-lg border p-4 text-left transition-all duration-ds-fast ${
-                              isSelected
-                                ? `${provider.selectedBg} ring-2 ${provider.selectedBorder}`
-                                : isDisabled
-                                ? 'border-ds-muted/10 bg-ds-muted/5 cursor-not-allowed opacity-40'
-                                : `bg-ds-background ${provider.defaultBg}`
-                            }`}
-                          >
-                            {/* Logo */}
-                            <div className="mb-3">
-                              <provider.Logo />
-                            </div>
-                            <div>
-                              <p className={`text-xs mt-1 ${isSelected ? provider.accentColor : 'text-ds-muted'}`}>
-                                {provider.description}
-                              </p>
-                              {method && (
-                                <p className="text-xs text-ds-muted/60 mt-1">
-                                  ৳{method.min_amount} – ৳{method.max_amount}
-                                </p>
-                              )}
-                            </div>
-                            {isDisabled && (
-                              <div className="absolute inset-0 flex items-center justify-center rounded-ds-lg">
-                                <span className="text-xs bg-ds-muted/90 text-white px-2 py-1 rounded">
-                                  Unavailable
-                                </span>
-                              </div>
-                            )}
-                            {isSelected && (
-                              <div className={`absolute top-2 right-2 h-2 w-2 rounded-full ${
-                                provider.provider === PaymentProvider.BKASH ? 'bg-pink-500' :
-                                provider.provider === PaymentProvider.NAGAD ? 'bg-orange-500' : 'bg-blue-500'
-                              }`} />
-                            )}
-                          </button>
-                        );
-                      })}
-                    </div>
-                  )}
+                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                    {PAYMENT_PROVIDERS.map((provider) => {
+                      const isSelected = form.payment_provider === provider.provider;
+
+                      return (
+                        <button
+                          key={provider.provider}
+                          type="button"
+                          onClick={() => handlePaymentMethodSelect(provider.provider)}
+                          className={`relative rounded-ds-lg border p-4 text-left transition-all duration-200 ${
+                            isSelected
+                              ? `${provider.selectedBg} ring-2 ${provider.selectedBorder}`
+                              : `bg-ds-background ${provider.defaultBg}`
+                          }`}
+                        >
+                          {/* Logo */}
+                          <div className="mb-3">
+                            <provider.Logo />
+                          </div>
+                          <p className={`text-xs ${isSelected ? provider.accentColor : 'text-ds-muted'}`}>
+                            {provider.description}
+                          </p>
+                          {/* Selected indicator dot */}
+                          {isSelected && (
+                            <div className={`absolute top-2 right-2 h-2.5 w-2.5 rounded-full ${
+                              provider.provider === PaymentProvider.BKASH ? 'bg-pink-500' :
+                              provider.provider === PaymentProvider.NAGAD ? 'bg-orange-500' : 'bg-blue-500'
+                            }`} />
+                          )}
+                        </button>
+                      );
+                    })}
+                  </div>
                   {errors.payment_provider && (
                     <p className="mt-1 text-xs text-ds-danger">{errors.payment_provider}</p>
                   )}
