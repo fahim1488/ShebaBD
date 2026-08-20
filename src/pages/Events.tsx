@@ -98,17 +98,20 @@ export default function Events() {
   const rest = events.filter(e => !e.is_featured || events.length === 1);
 
   return (
-    <div className="min-h-screen bg-ds-background">
-      <section className="bg-gradient-to-br from-ds-accent/5 via-ds-background to-ds-primary/5 py-14">
+    <div style={{ background: '#0B2E22', color: '#F7F1E1' }} className="min-h-screen">
+      <section 
+        style={{ background: 'linear-gradient(135deg, #0B2E22 0%, #0F3A2B 50%, #0B2E22 100%)' }}
+        className="py-14 border-b border-[rgba(247,241,225,0.12)]"
+      >
         <div className="mx-auto max-w-7xl px-4 md:px-8">
           <motion.div variants={fadeUp} initial="hidden" animate="show" className="max-w-2xl">
-            <span className="mb-3 inline-flex items-center gap-2 rounded-ds-full border border-ds-accent/20 bg-ds-accent/10 px-3 py-1 text-xs font-medium text-ds-accent">
+            <span className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#E7A93B]/30 bg-[#E7A93B]/10 px-3.5 py-1 text-xs font-medium text-[#E7A93B] backdrop-blur-md">
               <CalendarDays size={12} /> Events & Campaigns
             </span>
-            <h1 className="font-display text-3xl font-bold text-ds-foreground md:text-4xl">
+            <h1 className="font-display text-3xl font-bold text-[#F7F1E1] md:text-4xl tracking-tight">
               Upcoming Social Events
             </h1>
-            <p className="mt-3 text-ds-muted">
+            <p className="mt-3 text-[rgba(247,241,225,0.75)] leading-relaxed">
               Join blood drives, medical camps, awareness campaigns, and volunteer events across Bangladesh.
             </p>
           </motion.div>
@@ -127,10 +130,10 @@ export default function Events() {
           <div className="flex flex-wrap gap-2">
             {EVENT_CATS.map(({ id, label }) => (
               <button key={id} onClick={() => setActiveCategory(id)}
-                className={`rounded-ds-full border px-3 py-1.5 text-sm font-medium transition-colors duration-ds-fast ${
+                className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
                   activeCategory === id
-                    ? 'border-ds-primary bg-ds-primary text-white'
-                    : 'border-ds-muted/20 bg-ds-surface text-ds-muted hover:border-ds-primary/40 hover:text-ds-primary'
+                    ? 'border-[#D6472C] bg-[#D6472C] text-white shadow-md'
+                    : 'border-[rgba(247,241,225,0.18)] bg-[#0F3A2B] text-[rgba(247,241,225,0.7)] hover:border-[#E7A93B] hover:text-[#E7A93B]'
                 }`}>
                 {label}
               </button>
@@ -141,15 +144,15 @@ export default function Events() {
         {/* Loading / Error */}
         {loading && (
           <div className="flex justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-ds-primary" />
+            <Loader2 className="h-8 w-8 animate-spin text-[#E7A93B]" />
           </div>
         )}
 
         {error && !loading && (
-          <div className="flex items-center gap-3 rounded-ds-lg border border-ds-danger/20 bg-ds-danger/5 p-4">
-            <AlertCircle size={16} className="text-ds-danger shrink-0" />
-            <p className="text-sm text-ds-foreground flex-1">{error}</p>
-            <button onClick={loadEvents} className="flex items-center gap-1 text-xs border border-ds-muted/20 px-3 py-1 rounded-ds-md text-ds-muted hover:text-ds-foreground">
+          <div className="flex items-center gap-3 rounded-xl border border-red-500/30 bg-red-500/10 p-4">
+            <AlertCircle size={16} className="text-red-400 shrink-0" />
+            <p className="text-sm text-red-200 flex-1">{error}</p>
+            <button onClick={loadEvents} className="flex items-center gap-1 text-xs border border-[rgba(247,241,225,0.2)] px-3 py-1 rounded-lg text-[#F7F1E1]">
               <RefreshCw size={11} /> Retry
             </button>
           </div>
@@ -160,15 +163,16 @@ export default function Events() {
             {/* Featured event */}
             {featured && (
               <motion.div variants={fadeUp} initial="hidden" animate="show"
-                className="relative overflow-hidden rounded-ds-2xl border border-ds-primary/20 bg-gradient-to-br from-ds-primary/10 to-ds-surface p-6 shadow-ds-md md:p-8">
-                <span className="mb-3 inline-flex items-center gap-1.5 rounded-ds-full border border-ds-primary/20 bg-ds-primary/10 px-3 py-1 text-xs font-medium text-ds-primary">
+                style={{ background: '#0F3A2B', borderColor: 'rgba(231,169,59,0.3)' }}
+                className="relative overflow-hidden rounded-2xl border p-6 shadow-xl md:p-8">
+                <span className="mb-3 inline-flex items-center gap-1.5 rounded-full border border-[#E7A93B]/30 bg-[#E7A93B]/10 px-3 py-1 text-xs font-medium text-[#E7A93B]">
                   ⭐ Featured Event
                 </span>
                 <div className="grid grid-cols-1 gap-6 md:grid-cols-3">
                   <div className="md:col-span-2 space-y-3">
-                    <h2 className="font-display text-2xl font-bold text-ds-foreground">{featured.title}</h2>
-                    <p className="text-sm text-ds-muted leading-relaxed">{featured.description}</p>
-                    <div className="flex flex-wrap gap-4 text-sm text-ds-muted">
+                    <h2 className="font-display text-2xl font-bold text-[#F7F1E1]">{featured.title}</h2>
+                    <p className="text-sm text-[rgba(247,241,225,0.75)] leading-relaxed">{featured.description}</p>
+                    <div className="flex flex-wrap gap-4 text-sm text-[rgba(247,241,225,0.7)]">
                       <span className="flex items-center gap-1.5"><CalendarDays size={14} />{featured.date}</span>
                       <span className="flex items-center gap-1.5"><Clock size={14} />{featured.time}</span>
                       <span className="flex items-center gap-1.5"><MapPin size={14} />{featured.location}</span>
@@ -177,7 +181,7 @@ export default function Events() {
                     {featured.tags && (
                       <div className="flex flex-wrap gap-2">
                         {featured.tags.split(',').map(tag => (
-                          <span key={tag} className="flex items-center gap-1 rounded-ds-full bg-ds-primary/10 px-2.5 py-0.5 text-xs font-medium text-ds-primary">
+                          <span key={tag} className="flex items-center gap-1 rounded-full border border-[#3E7A8C]/30 bg-[#3E7A8C]/15 px-2.5 py-0.5 text-xs font-medium text-[#3E7A8C]">
                             <Tag size={10} />{tag.trim()}
                           </span>
                         ))}
@@ -186,24 +190,27 @@ export default function Events() {
                   </div>
                   <div className="flex flex-col gap-3 justify-center">
                     <div className="space-y-1.5">
-                      <div className="flex justify-between text-xs text-ds-muted">
+                      <div className="flex justify-between text-xs text-[rgba(247,241,225,0.65)]">
                         <span>Registration</span>
                         <span>{Math.round((featured.registered_count / featured.capacity) * 100)}% filled</span>
                       </div>
-                      <div className="h-2 w-full rounded-full bg-ds-muted/20 overflow-hidden">
-                        <div className="h-full rounded-full bg-ds-primary transition-all duration-ds-slow"
+                      <div className="h-2 w-full rounded-full bg-[rgba(247,241,225,0.12)] overflow-hidden">
+                        <div className="h-full rounded-full bg-[#E7A93B] transition-all"
                           style={{ width: `${Math.min((featured.registered_count / featured.capacity) * 100, 100)}%` }} />
                       </div>
                     </div>
                     {confirmedId === featured.id ? (
-                      <div className="flex items-center gap-2 rounded-ds-md bg-ds-success/10 p-3 text-sm text-ds-success font-medium">
+                      <div className="flex items-center gap-2 rounded-xl bg-emerald-500/15 border border-emerald-500/30 p-3 text-sm text-emerald-400 font-medium">
                         <CheckCircle2 size={16} /> Registered Successfully!
                       </div>
                     ) : (
-                      <Button leftIcon={ArrowRight} onClick={() => setRegisteringId(featured.id)}
-                        disabled={featured.registered_count >= featured.capacity}>
-                        {featured.registered_count >= featured.capacity ? 'Fully Booked' : 'Register Now'}
-                      </Button>
+                      <button 
+                        onClick={() => setRegisteringId(featured.id)}
+                        disabled={featured.registered_count >= featured.capacity}
+                        className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#D6472C] px-5 py-2.5 text-sm font-semibold text-white shadow-lg hover:bg-[#b83a22] transition-colors disabled:opacity-50"
+                      >
+                        {featured.registered_count >= featured.capacity ? 'Fully Booked' : 'Register Now'} <ArrowRight size={16} />
+                      </button>
                     )}
                   </div>
                 </div>
@@ -212,7 +219,7 @@ export default function Events() {
 
             {/* Event grid */}
             {rest.length === 0 && !featured ? (
-              <div className="flex flex-col items-center justify-center py-24 text-ds-muted">
+              <div className="flex flex-col items-center justify-center py-24 text-[rgba(247,241,225,0.5)]">
                 <Search size={48} className="mb-4 opacity-30" />
                 <p className="text-lg font-medium">No events found</p>
               </div>
@@ -221,28 +228,29 @@ export default function Events() {
                 {rest.map((event, i) => (
                   <motion.div key={event.id} variants={fadeUp} initial="hidden" whileInView="show"
                     viewport={{ once: true }} custom={i}
-                    className="flex flex-col gap-4 rounded-ds-xl border border-ds-muted/10 bg-ds-surface p-5 shadow-ds-sm hover:shadow-ds-md hover:-translate-y-0.5 transition-all duration-ds-normal">
+                    style={{ background: '#0F3A2B', borderColor: 'rgba(247,241,225,0.14)' }}
+                    className="flex flex-col gap-4 rounded-2xl border p-5 shadow-lg hover:border-[rgba(231,169,59,0.3)] transition-all">
                     <div className="flex items-start gap-3">
-                      <div className={`flex h-11 w-11 shrink-0 items-center justify-center rounded-ds-lg ${CAT_COLORS[event.category] ?? 'bg-ds-muted/10 text-ds-muted'}`}>
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl bg-[#E7A93B]/15 border border-[#E7A93B]/30 text-[#E7A93B]">
                         {(() => { const cat = EVENT_CATS.find(c => c.id === event.category); const Icon = cat?.icon; return Icon ? <Icon size={20} /> : <CalendarDays size={20} />; })()}
                       </div>
                       <div className="flex-1 min-w-0">
-                        <h3 className="font-semibold text-ds-foreground leading-snug">{event.title}</h3>
-                        <p className="mt-0.5 text-xs text-ds-muted">{event.organizer}</p>
+                        <h3 className="font-semibold text-[#F7F1E1] leading-snug">{event.title}</h3>
+                        <p className="mt-0.5 text-xs text-[rgba(247,241,225,0.65)]">{event.organizer}</p>
                       </div>
                     </div>
-                    <p className="text-sm text-ds-muted leading-relaxed line-clamp-2">{event.description}</p>
-                    <div className="flex flex-col gap-1 text-xs text-ds-muted">
+                    <p className="text-sm text-[rgba(247,241,225,0.7)] leading-relaxed line-clamp-2">{event.description}</p>
+                    <div className="flex flex-col gap-1 text-xs text-[rgba(247,241,225,0.65)]">
                       <span className="flex items-center gap-1.5"><CalendarDays size={11} />{event.date} · {event.time}</span>
                       <span className="flex items-center gap-1.5"><MapPin size={11} />{event.location}</span>
                     </div>
                     <div className="space-y-1">
-                      <div className="flex justify-between text-xs text-ds-muted">
+                      <div className="flex justify-between text-xs text-[rgba(247,241,225,0.65)]">
                         <span className="flex items-center gap-1"><Users size={10} />{event.registered_count}/{event.capacity}</span>
                         <span>{Math.round((event.registered_count / event.capacity) * 100)}% filled</span>
                       </div>
-                      <div className="h-1.5 w-full rounded-full bg-ds-muted/20 overflow-hidden">
-                        <div className="h-full rounded-full bg-ds-primary"
+                      <div className="h-1.5 w-full rounded-full bg-[rgba(247,241,225,0.12)] overflow-hidden">
+                        <div className="h-full rounded-full bg-[#E7A93B]"
                           style={{ width: `${Math.min((event.registered_count / event.capacity) * 100, 100)}%` }} />
                       </div>
                     </div>
