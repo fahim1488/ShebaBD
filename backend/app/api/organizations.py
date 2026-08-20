@@ -62,3 +62,4 @@ async def get_organization(org_id: int, db: AsyncSession = Depends(get_db)):
         raise HTTPException(status_code=404, detail="Organization not found")
     return org
  
+# Murad: Category filter endpoint
