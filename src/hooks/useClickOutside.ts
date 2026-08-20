@@ -1,4 +1,5 @@
-import { useEffect, useRef, RefObject } from 'react';
+import { useEffect, useRef } from 'react';
+import type { RefObject } from 'react';
 
 /**
  * useClickOutside — fires a callback when the user clicks outside a referenced element.
@@ -10,7 +11,7 @@ import { useEffect, useRef, RefObject } from 'react';
  */
 export function useClickOutside<T extends HTMLElement = HTMLElement>(
   callback: () => void,
-): RefObject<T> {
+): RefObject<T | null> {
   const ref = useRef<T>(null);
 
   useEffect(() => {

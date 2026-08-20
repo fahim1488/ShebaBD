@@ -1,4 +1,4 @@
-import { LucideIcon } from 'lucide-react';
+import type { LucideIcon } from 'lucide-react';
 
 type BadgeVariant = 'success' | 'danger' | 'warning' | 'info' | 'default';
 
