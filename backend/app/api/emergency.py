@@ -66,3 +66,4 @@ async def list_emergency_requests(
     )
     return result.scalars().all()
  
+# Murad: Live emergency stream
