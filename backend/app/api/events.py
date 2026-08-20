@@ -76,3 +76,4 @@ async def register_for_event(
     await db.refresh(reg)
     return reg
  
+# Murad: Event quota validation
