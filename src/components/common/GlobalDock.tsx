@@ -9,7 +9,8 @@ import {
   MessageCircle, 
   HandHeart,
   AlertTriangle,
-  MessageSquare 
+  MessageSquare,
+  Bot 
 } from 'lucide-react';
 import Dock from '@/components/Dock';
 import { ROUTES } from '@/constants/routes';
@@ -70,7 +71,7 @@ export function GlobalDock() {
       onClick: () => navigate(ROUTES.COMMUNITY),
     },
     {
-      icon: <MessageCircle size={19} />,
+      icon: <Bot size={20} className="text-[#E7A93B]" />,
       label: 'AI Assistant',
       isActive: false, // AI assistant doesn't have a route, it's a floating component
       onClick: () => {

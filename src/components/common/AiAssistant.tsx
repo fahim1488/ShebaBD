@@ -612,10 +612,10 @@ export function AiAssistant() {
             <motion.div
               initial={{ opacity: 0, x: 10 }} animate={{ opacity: 1, x: 0 }} exit={{ opacity: 0, x: 10 }}
               transition={{ duration: 0.2 }}
-              className="font-mono-ibm text-[11.5px] px-3 py-1.5 rounded-full pointer-events-none"
-              style={{ background: INK2, border: `1px solid ${LINE}`, color: PAPER }}
+              className="font-mono-ibm text-[11.5px] px-3.5 py-1.5 rounded-full pointer-events-none flex items-center gap-1.5 shadow-lg"
+              style={{ background: INK2, border: `1px solid ${MARIG}55`, color: PAPER }}
             >
-              AI Assistant · Sheba
+              <Bot size={14} className="text-[#E7A93B]" /> AI Assistant · Sheba
             </motion.div>
           )}
         </AnimatePresence>
@@ -624,24 +624,30 @@ export function AiAssistant() {
           onClick={() => setOpen(o => !o)}
           aria-label="Open AI Assistant"
           className="relative flex items-center justify-center rounded-full shadow-2xl transition-all duration-200"
-          style={{ width: 56, height: 56, background: open ? INK3 : DISC, border: `2px solid ${open ? LINE : DISC}` }}
+          style={{ 
+            width: 58, 
+            height: 58, 
+            background: open ? INK3 : 'linear-gradient(135deg, #D6472C 0%, #E7A93B 100%)', 
+            border: `2px solid ${open ? LINE : MARIG}`,
+            boxShadow: '0 0 22px rgba(231, 169, 59, 0.45)'
+          }}
           onMouseEnter={e => { if (!open) e.currentTarget.style.transform = 'scale(1.08)'; }}
           onMouseLeave={e => { e.currentTarget.style.transform = 'scale(1)'; }}
         >
           <AnimatePresence mode="wait">
             {open
-              ? <motion.div key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.18 }}><X size={22} color={PAPER} /></motion.div>
-              : <motion.div key="chat" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.18 }}><MessageCircle size={22} color={PAPER} /></motion.div>
+              ? <motion.div key="x" initial={{ rotate: -90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: 90, opacity: 0 }} transition={{ duration: 0.18 }}><X size={24} color={PAPER} /></motion.div>
+              : <motion.div key="chat" initial={{ rotate: 90, opacity: 0 }} animate={{ rotate: 0, opacity: 1 }} exit={{ rotate: -90, opacity: 0 }} transition={{ duration: 0.18 }}><Bot size={26} color={PAPER} /></motion.div>
             }
           </AnimatePresence>
           {!open && unread > 0 && (
-            <span className="absolute -top-1 -right-1 flex items-center justify-center rounded-full font-mono-ibm text-[10px] font-bold"
-              style={{ width: 18, height: 18, background: MARIG, color: INK }}>
+            <span className="absolute -top-1 -right-1 flex items-center justify-center rounded-full font-mono-ibm text-[10px] font-bold shadow-md"
+              style={{ width: 20, height: 20, background: MARIG, color: INK }}>
               {unread}
             </span>
           )}
           {!open && (
-            <motion.span className="absolute inset-0 rounded-full" style={{ border: `2px solid ${DISC}` }}
+            <motion.span className="absolute inset-0 rounded-full" style={{ border: `2px solid ${MARIG}` }}
               animate={{ scale: [1, 1.5], opacity: [0.6, 0] }}
               transition={{ duration: 1.8, repeat: Infinity, ease: 'easeOut' }}
             />
@@ -665,20 +671,22 @@ export function AiAssistant() {
               height: 'min(620px, calc(100vh - 110px))',
               background: INK,
               border: `1px solid ${LINE}`,
-              borderRadius: 10,
+              borderRadius: 12,
               boxShadow: '0 32px 64px rgba(0,0,0,0.6)',
             }}
           >
             {/* Header */}
             <div className="flex items-center justify-between px-4 py-3 flex-shrink-0"
-              style={{ borderBottom: `1px solid ${LINE}`, background: INK2, borderRadius: '10px 10px 0 0' }}>
+              style={{ borderBottom: `1px solid ${LINE}`, background: INK2, borderRadius: '12px 12px 0 0' }}>
               <div className="flex items-center gap-3">
                 <div className="flex items-center justify-center rounded-full"
-                  style={{ width: 36, height: 36, background: `${DISC}22`, border: `2px solid ${DISC}66` }}>
-                  <Droplets size={17} style={{ color: DISC }} />
+                  style={{ width: 38, height: 38, background: `${MARIG}22`, border: `2px solid ${MARIG}66` }}>
+                  <Bot size={20} style={{ color: MARIG }} />
                 </div>
                 <div>
-                  <p className="font-fraunces font-semibold text-[14px]" style={{ color: PAPER }}>Sheba AI</p>
+                  <p className="font-fraunces font-semibold text-[14.5px] flex items-center gap-1.5" style={{ color: PAPER }}>
+                    Sheba AI Assistant
+                  </p>
                   <div className="flex items-center gap-1">
                     <span className="w-[6px] h-[6px] rounded-full inline-block" style={{ background: statusColor }} />
                     <span className="font-mono-ibm text-[10.5px]" style={{ color: MUTED }}>{statusLabel}</span>
