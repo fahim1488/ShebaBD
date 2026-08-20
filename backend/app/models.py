@@ -19,6 +19,7 @@ from sqlalchemy import (
     Boolean,
     DateTime,
     ForeignKey,
+    Index,
     Integer,
     JSON,
     String,
@@ -161,13 +162,19 @@ class Conversation(Base):
         default=_utcnow,
     )
 
-    # ── Relationships ─────────────────────────────────────────────────────────
+    # Relationships
     messages: Mapped[list["Message"]] = relationship(
         "Message",
         back_populates="conversation",
         cascade="all, delete-orphan",
         order_by="Message.created_at",
         lazy="selectin",
+    )
+
+    # ── Composite indexes for common query patterns ────────────────────────────
+    __table_args__ = (
+        Index("ix_conversations_user_active", "user_id", "is_active"),
+        Index("ix_conversations_user_updated", "user_id", "updated_at"),
     )
 
     def __repr__(self) -> str:
@@ -279,7 +286,7 @@ class Donation(Base):
 
     # Relationships
     user: Mapped["User"] = relationship("User", back_populates="donations")
-    transactions: Mapped[list["Transaction"]] = relationship("Transaction", back_populates="donation")
+    transactions: Mapped[list["Transaction"]] = relationship("Transaction", back_populates="donation", lazy="selectin")
 
     def __repr__(self) -> str:
         return f"<Donation id={self.id} amount={self.amount} cause={self.cause}>"
@@ -431,8 +438,8 @@ class ForumThread(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now(), default=_utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=_utcnow, default=_utcnow)
 
-    replies: Mapped[list["ForumReply"]] = relationship("ForumReply", back_populates="thread", cascade="all, delete-orphan", order_by="ForumReply.created_at")
-    likes: Mapped[list["PostLike"]] = relationship("PostLike", foreign_keys="PostLike.thread_id", back_populates="thread", cascade="all, delete-orphan")
+    replies: Mapped[list["ForumReply"]] = relationship("ForumReply", back_populates="thread", cascade="all, delete-orphan", order_by="ForumReply.created_at", lazy="selectin")
+    likes: Mapped[list["PostLike"]] = relationship("PostLike", foreign_keys="PostLike.thread_id", back_populates="thread", cascade="all, delete-orphan", lazy="selectin")
 
 
 class ForumReply(Base):
@@ -503,6 +510,13 @@ class BloodDonor(Base):
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now(), default=_utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=_utcnow, default=_utcnow)
 
+    # Composite index: district + blood_group is the most common query pattern
+    __table_args__ = (
+        Index("ix_blood_donors_district_group", "district", "blood_group"),
+        Index("ix_blood_donors_district_available", "district", "is_available"),
+        Index("ix_blood_donors_group_available", "blood_group", "is_available"),
+    )
+
 
 class BloodRequest(Base):
     """Urgent blood request from a patient/family."""
@@ -524,6 +538,13 @@ class BloodRequest(Base):
     expires_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now(), default=_utcnow)
     updated_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now(), onupdate=_utcnow, default=_utcnow)
+
+    # Composite index: district + blood_group + urgency for fast emergency lookups
+    __table_args__ = (
+        Index("ix_blood_requests_district_group", "hospital_district", "blood_group"),
+        Index("ix_blood_requests_group_fulfilled", "blood_group", "is_fulfilled"),
+        Index("ix_blood_requests_district_urgency", "hospital_district", "urgency"),
+    )
 
 
 # ── Events ────────────────────────────────────────────────────────────────────
@@ -598,4 +619,4 @@ class Organization(Base):
     is_verified: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now(), default=_utcnow)
-/* Fahim: Blood donation models */ 
+ 

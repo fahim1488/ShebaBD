@@ -164,6 +164,11 @@ class HealthResponse(BaseModel):
     environment: str
     database: Literal["connected", "disconnected"] = "connected"
     openai: Literal["configured", "missing_key"] = "configured"
+    # Enhanced fields
+    uptime_seconds: Optional[float] = None
+    database_latency_ms: Optional[float] = None
+    active_conversations: Optional[int] = None
+    checks: Optional[Dict[str, str]] = None
 
 # ── User schemas ──────────────────────────────────────────────────────────────
 class UserBase(BaseModel):

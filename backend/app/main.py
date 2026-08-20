@@ -18,6 +18,7 @@ import uuid
 from fastapi import FastAPI, Request, status
 from fastapi.exceptions import RequestValidationError
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.gzip import GZipMiddleware
 from fastapi.responses import JSONResponse
 from starlette.middleware.base import BaseHTTPMiddleware
 
@@ -100,7 +101,10 @@ def create_app() -> FastAPI:
 # ── Middleware registration ───────────────────────────────────────────────────
 def _register_middleware(app: FastAPI) -> None:
 
-    # 1. CORS ──────────────────────────────────────────────────────────────────
+    # 1. GZip compression — compress responses > 1KB ──────────────────────────
+    app.add_middleware(GZipMiddleware, minimum_size=1024)
+
+    # 2. CORS ──────────────────────────────────────────────────────────────────
     app.add_middleware(
         CORSMiddleware,
         allow_origins=settings.allowed_origins_list,
@@ -110,12 +114,23 @@ def _register_middleware(app: FastAPI) -> None:
         expose_headers=["X-Request-ID", "X-Process-Time"],
     )
 
-    # 2. Request ID + timing ───────────────────────────────────────────────────
+    # 3. Request ID + timing ───────────────────────────────────────────────────
     class RequestContextMiddleware(BaseHTTPMiddleware):
         async def dispatch(self, request: Request, call_next):
-            request_id = request.headers.get("X-Request-ID") or str(uuid.uuid4())
+            # Use client-provided request ID or generate a new short one
+            request_id = request.headers.get("X-Request-ID") or uuid.uuid4().hex[:12]
             request.state.request_id = request_id
             start = time.perf_counter()
+
+            # Log incoming request with client IP
+            client_ip = request.headers.get("X-Forwarded-For", request.client.host if request.client else "unknown")
+            logger.info(
+                "→ %s %s | ip=%s | req=%s",
+                request.method,
+                request.url.path,
+                client_ip,
+                request_id,
+            )
 
             try:
                 response = await call_next(request)
@@ -134,11 +149,14 @@ def _register_middleware(app: FastAPI) -> None:
             response.headers["X-Request-ID"]    = request_id
             response.headers["X-Process-Time"]  = f"{elapsed_ms:.2f}ms"
 
+            # Structured response log with status class indicator
+            status_class = f"{response.status_code // 100}xx"
             logger.info(
-                "%s %s | %d | %.1fms | req=%s",
+                "← %s %s | %d (%s) | %.1fms | req=%s",
                 request.method,
                 request.url.path,
                 response.status_code,
+                status_class,
                 elapsed_ms,
                 request_id,
             )
@@ -182,5 +200,3 @@ def _register_exception_handlers(app: FastAPI) -> None:
 
 # ── App instance (imported by uvicorn) ───────────────────────────────────────
 app = create_app()
-/* Fahim: FastAPI configuration */ 
-/* Fahim: API documentation */ 
