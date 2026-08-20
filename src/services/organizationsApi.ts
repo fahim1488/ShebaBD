@@ -32,3 +32,4 @@ export const getOrgCount = async (): Promise<number> => {
   const res = await api.get('/organizations/count');
   return res.data.count;
 };
+// Murad: Search query API handler
