@@ -166,7 +166,7 @@ export default function BloodDonation() {
       setFormSuccess('registered');
       getBloodStats().then(setStats).catch(() => {});
     } catch (err: any) {
-      setFormError(err?.message || 'Registration failed. Please try again.');
+      setFormError(err?.response?.data?.detail || err?.message || 'Registration failed. Please try again.');
     } finally {
       setFormLoading(false);
     }
@@ -191,7 +191,7 @@ export default function BloodDonation() {
       setFormSuccess('requested');
       getBloodStats().then(setStats).catch(() => {});
     } catch (err: any) {
-      setFormError(err?.message || 'Failed to submit request. Please try again.');
+      setFormError(err?.response?.data?.detail || err?.message || 'Failed to submit request. Please try again.');
     } finally {
       setFormLoading(false);
     }
@@ -203,7 +203,9 @@ export default function BloodDonation() {
       const updated = await updateMyAvailability(!myProfile.is_available);
       setMyProfile(updated);
       getBloodStats().then(setStats).catch(() => {});
-    } catch { /* silent */ }
+    } catch (err: any) {
+      setFormError(err?.response?.data?.detail || 'Could not update availability. Please try again.');
+    }
   };
 
   const handleFulfill = async (id: number) => {
@@ -211,20 +213,25 @@ export default function BloodDonation() {
       await fulfillBloodRequest(id);
       setRequests(p => p.filter(r => r.id !== id));
       getBloodStats().then(setStats).catch(() => {});
-    } catch { /* silent */ }
+    } catch (err: any) {
+      setFormError(err?.response?.data?.detail || 'Could not mark request as fulfilled. Please try again.');
+    }
   };
 
   return (
-    <div className="min-h-screen bg-ds-background">
+    <div style={{ background: '#0B2E22', color: '#F7F1E1' }} className="min-h-screen">
       {/* ── Hero ──────────────────────────────────────────────────────────── */}
-      <section className="bg-gradient-to-br from-red-500/5 via-ds-background to-ds-primary/5 py-14">
+      <section 
+        style={{ background: 'linear-gradient(135deg, #0B2E22 0%, #0F3A2B 50%, #0B2E22 100%)' }}
+        className="py-14 border-b border-[rgba(247,241,225,0.12)]"
+      >
         <div className="mx-auto max-w-7xl px-4 md:px-8">
           <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="max-w-2xl">
-            <span className="mb-3 inline-flex items-center gap-2 rounded-ds-full border border-red-500/20 bg-red-500/10 px-3 py-1 text-xs font-medium text-red-500">
+            <span className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#D6472C]/40 bg-[#D6472C]/15 px-3.5 py-1 text-xs font-medium text-[#D6472C] backdrop-blur-md">
               <Droplets size={12} /> Blood Donation Network
             </span>
-            <h1 className="font-display text-3xl font-bold text-ds-foreground md:text-4xl">Every Drop Counts</h1>
-            <p className="mt-3 text-ds-muted">
+            <h1 className="font-display text-3xl font-bold text-[#F7F1E1] md:text-4xl tracking-tight">Every Drop Counts</h1>
+            <p className="mt-3 text-[rgba(247,241,225,0.75)] leading-relaxed">
               AI-powered blood donor matching by blood group, location, and availability. Find a donor or register to save a life.
             </p>
           </motion.div>
@@ -232,7 +239,7 @@ export default function BloodDonation() {
       </section>
 
       {/* ── Stats ─────────────────────────────────────────────────────────── */}
-      <section className="border-y border-ds-muted/10 bg-ds-surface py-8">
+      <section style={{ background: '#0F3A2B', borderColor: 'rgba(247,241,225,0.12)' }} className="border-y py-8">
         <div className="mx-auto max-w-7xl px-4 md:px-8">
           <div className="grid grid-cols-2 gap-4 md:grid-cols-4">
             {[
@@ -243,8 +250,8 @@ export default function BloodDonation() {
             ].map(({ val, label }, i) => (
               <motion.div key={label} initial={{ opacity: 0, y: 12 }} whileInView={{ opacity: 1, y: 0 }}
                 transition={{ delay: i * 0.07 }} viewport={{ once: true }} className="text-center">
-                <p className="font-display text-xl font-bold text-red-500 md:text-2xl">{val}</p>
-                <p className="mt-1 text-xs text-ds-muted">{label}</p>
+                <p className="font-display text-xl font-bold text-[#D6472C] md:text-2xl">{val}</p>
+                <p className="mt-1 text-xs text-[rgba(247,241,225,0.65)]">{label}</p>
               </motion.div>
             ))}
           </div>
@@ -253,7 +260,7 @@ export default function BloodDonation() {
 
       <div className="mx-auto max-w-7xl px-4 py-10 md:px-8">
         {/* ── Tabs ──────────────────────────────────────────────────────────── */}
-        <div className="mb-8 flex flex-wrap gap-2 rounded-ds-lg border border-ds-muted/10 bg-ds-surface p-1 w-fit">
+        <div style={{ background: '#0F3A2B', borderColor: 'rgba(247,241,225,0.14)' }} className="mb-8 flex flex-wrap gap-2 rounded-xl border p-1.5 w-fit">
           {([
             { id: 'find',     label: 'Find Donor',       icon: Search },
             { id: 'requests', label: 'Blood Requests',   icon: Activity },
@@ -261,8 +268,8 @@ export default function BloodDonation() {
             { id: 'register', label: 'Register as Donor',icon: Heart },
           ] as const).map(({ id, label, icon: Icon }) => (
             <button key={id} onClick={() => { setTab(id); setFormSuccess(null); setFormError(null); }}
-              className={`flex items-center gap-2 rounded-ds-md px-4 py-2 text-sm font-medium transition-colors ${
-                tab === id ? 'bg-red-500 text-white shadow-ds-sm' : 'text-ds-muted hover:text-ds-foreground'
+              className={`flex items-center gap-2 rounded-lg px-4 py-2 text-sm font-medium transition-colors ${
+                tab === id ? 'bg-[#D6472C] text-white shadow-md' : 'text-[rgba(247,241,225,0.7)] hover:text-[#F7F1E1]'
               }`}>
               <Icon size={14} />{label}
             </button>

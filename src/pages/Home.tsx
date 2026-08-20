@@ -238,17 +238,18 @@ export default function Home() {
           HERO SECTION — High Impact 3D Glassmorphism
       ════════════════════════════════════════════════════════════════════ */}
       <section className="relative overflow-hidden flex flex-col justify-center min-h-[95vh] pt-32 pb-24">
-        {/* Background Image with Zoom & Dark Gradient Backdrop */}
+        {/* Background Image — visible at 60% opacity */}
         <div
-          className="absolute inset-0 bg-cover bg-center bg-no-repeat transition-transform duration-10000 ease-out scale-105 opacity-25"
+          className="absolute inset-0 bg-cover bg-center bg-no-repeat scale-105"
           style={{
             backgroundImage: 'url(/hero-bg.png)',
             backgroundPosition: 'center 30%',
+            opacity: 0.60,
           }}
         />
 
-        {/* Ambient Dark Emerald + Radial Orbs */}
-        <div className="absolute inset-0 bg-gradient-to-b from-[#061B14]/90 via-[#0B2E22]/95 to-[#061912]" />
+        {/* Dark tint overlay — light enough to show image, dark enough for text readability */}
+        <div className="absolute inset-0 bg-gradient-to-b from-[#061B14]/55 via-[#0B2E22]/60 to-[#061912]/80" />
         <div className="absolute top-1/3 left-1/4 w-[500px] h-[500px] bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none" />
         <div className="absolute bottom-1/4 right-1/4 w-[450px] h-[450px] bg-amber-500/10 rounded-full blur-[140px] pointer-events-none" />
 

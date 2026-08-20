@@ -56,6 +56,7 @@ type RegistrationForm = {
 export default function Volunteers() {
   const navigate = useNavigate();
   const [activeSkill, setActiveSkill] = useState('all');
+  const [selectedSkill, setSelectedSkill] = useState('');  // separate state for form
   const [search, setSearch] = useState('');
   const [showForm, setShowForm] = useState(false);
   const [form, setForm] = useState<RegistrationForm>({ name: '', email: '', phone: '', district: '', password: '' });
@@ -94,28 +95,37 @@ export default function Volunteers() {
   };
 
   return (
-    <div className="min-h-screen bg-ds-background">
+    <div style={{ background: '#0B2E22', color: '#F7F1E1' }} className="min-h-screen">
       {/* ── Header ─────────────────────────────────────────────────────────── */}
-      <section className="bg-gradient-to-br from-ds-secondary/5 via-ds-background to-ds-primary/5 py-14">
+      <section 
+        style={{ background: 'linear-gradient(135deg, #0B2E22 0%, #0F3A2B 50%, #0B2E22 100%)' }}
+        className="py-14 border-b border-[rgba(247,241,225,0.12)]"
+      >
         <div className="mx-auto max-w-7xl px-4 md:px-8">
           <motion.div variants={fadeUp} initial="hidden" animate="show" className="max-w-2xl">
-            <span className="mb-3 inline-flex items-center gap-2 rounded-ds-full border border-ds-secondary/20 bg-ds-secondary/10 px-3 py-1 text-xs font-medium text-ds-secondary">
+            <span className="mb-3 inline-flex items-center gap-2 rounded-full border border-[#E7A93B]/30 bg-[#E7A93B]/10 px-3.5 py-1 text-xs font-medium text-[#E7A93B] backdrop-blur-md">
               <Users size={12} /> Volunteer Network
             </span>
-            <h1 className="font-display text-3xl font-bold text-ds-foreground md:text-4xl">
+            <h1 className="font-display text-3xl font-bold text-[#F7F1E1] md:text-4xl tracking-tight">
               Become a Change-Maker
             </h1>
-            <p className="mt-3 text-ds-muted">
+            <p className="mt-3 text-[rgba(247,241,225,0.75)] leading-relaxed">
               Join 18,000+ volunteers making a real difference across Bangladesh.
               Register, get AI-matched, and start your journey today.
             </p>
-            <div className="mt-5 flex gap-3">
-              <Button leftIcon={UserPlus} onClick={() => setShowForm(true)}>
-                Register as Volunteer
-              </Button>
-              <Button variant="outline" leftIcon={Search} onClick={() => setShowForm(false)}>
-                Browse Volunteers
-              </Button>
+            <div className="mt-6 flex flex-wrap gap-3">
+              <button 
+                onClick={() => setShowForm(true)}
+                className="inline-flex items-center gap-2 rounded-xl bg-[#D6472C] px-5 py-2.5 text-sm font-semibold text-white shadow-lg hover:bg-[#b83a22] transition-colors"
+              >
+                <UserPlus size={16} /> Register as Volunteer
+              </button>
+              <button 
+                onClick={() => setShowForm(false)}
+                className="inline-flex items-center gap-2 rounded-xl border border-[rgba(247,241,225,0.2)] bg-transparent px-5 py-2.5 text-sm font-semibold text-[#F7F1E1] hover:bg-[rgba(247,241,225,0.08)] transition-colors"
+              >
+                <Search size={16} /> Browse Volunteers
+              </button>
             </div>
           </motion.div>
         </div>
@@ -124,7 +134,7 @@ export default function Volunteers() {
       <div className="mx-auto max-w-7xl px-4 py-10 md:px-8 space-y-14">
         {/* ── How it works ──────────────────────────────────────────────────── */}
         <section>
-          <h2 className="font-display text-2xl font-bold text-ds-foreground mb-6">How It Works</h2>
+          <h2 className="font-display text-2xl font-bold text-[#F7F1E1] mb-6 tracking-tight">How It Works</h2>
           <div className="grid grid-cols-1 gap-5 sm:grid-cols-2 lg:grid-cols-4">
             {HOW_IT_WORKS.map(({ step, title, desc }, i) => (
               <motion.div
@@ -134,11 +144,12 @@ export default function Volunteers() {
                 whileInView="show"
                 viewport={{ once: true }}
                 custom={i}
-                className="relative rounded-ds-xl border border-ds-muted/10 bg-ds-surface p-5 shadow-ds-sm"
+                style={{ background: '#0F3A2B', borderColor: 'rgba(247,241,225,0.14)' }}
+                className="relative rounded-2xl border p-5 shadow-lg"
               >
-                <span className="font-display text-4xl font-bold text-ds-primary/15">{step}</span>
-                <h3 className="mt-2 font-semibold text-ds-foreground">{title}</h3>
-                <p className="mt-1 text-sm text-ds-muted leading-relaxed">{desc}</p>
+                <span className="font-display text-4xl font-bold text-[#E7A93B]/25">{step}</span>
+                <h3 className="mt-2 font-semibold text-[#F7F1E1]">{title}</h3>
+                <p className="mt-1 text-sm text-[rgba(247,241,225,0.7)] leading-relaxed">{desc}</p>
               </motion.div>
             ))}
           </div>
@@ -149,26 +160,32 @@ export default function Volunteers() {
           <motion.section
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
-            className="rounded-ds-xl border border-ds-muted/10 bg-ds-surface p-6 shadow-ds-sm md:p-8"
+            style={{ background: '#0F3A2B', borderColor: 'rgba(247,241,225,0.14)' }}
+            className="rounded-2xl border p-6 shadow-xl md:p-8"
           >
-            <h2 className="font-display text-2xl font-bold text-ds-foreground mb-1">Volunteer Registration</h2>
-            <p className="text-sm text-ds-muted mb-6">Fill in your details to join the ShebaBD volunteer network.</p>
+            <h2 className="font-display text-2xl font-bold text-[#F7F1E1] mb-1">Volunteer Registration</h2>
+            <p className="text-sm text-[rgba(247,241,225,0.7)] mb-6">Fill in your details to join the ShebaBD volunteer network.</p>
 
             {submitted ? (
               <div className="flex flex-col items-center gap-3 py-12 text-center">
-                <BadgeCheck size={56} className="text-ds-success" />
-                <h3 className="font-display text-xl font-bold text-ds-foreground">Registration Successful!</h3>
-                <p className="text-sm text-ds-muted max-w-sm">
+                <BadgeCheck size={56} className="text-emerald-400" />
+                <h3 className="font-display text-xl font-bold text-[#F7F1E1]">Registration Successful!</h3>
+                <p className="text-sm text-[rgba(247,241,225,0.7)] max-w-sm">
                   Welcome to ShebaBD! Our AI will match you with the best volunteer opportunities. Check your email to verify your account.
                 </p>
-                <Button onClick={() => navigate(ROUTES.PROFILE)}>Go to Profile</Button>
+                <button 
+                  onClick={() => navigate(ROUTES.PROFILE)}
+                  className="rounded-xl bg-[#D6472C] px-5 py-2.5 text-sm font-semibold text-white shadow hover:bg-[#b83a22]"
+                >
+                  Go to Profile
+                </button>
               </div>
             ) : (
               <>
                 {formError && (
-                  <div className="rounded-ds-lg border border-ds-danger/30 bg-ds-danger/5 p-3 flex items-start gap-2 mb-4">
-                    <AlertCircle size={16} className="text-ds-danger mt-0.5 shrink-0" />
-                    <p className="text-sm text-ds-danger flex-1">{formError}</p>
+                  <div className="rounded-xl border border-red-500/30 bg-red-500/10 p-3.5 flex items-start gap-2 mb-4">
+                    <AlertCircle size={16} className="text-red-400 mt-0.5 shrink-0" />
+                    <p className="text-sm text-red-200 flex-1">{formError}</p>
                   </div>
                 )}
                 <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-5 sm:grid-cols-2">
@@ -199,23 +216,23 @@ export default function Volunteers() {
                   fullWidth
                 />
                 <div className="flex flex-col gap-1">
-                  <label className="block text-sm font-medium text-ds-foreground leading-none mb-1.5">
-                    District <span className="text-ds-danger ml-0.5">*</span>
+                  <label className="block text-sm font-medium text-[#F7F1E1] leading-none mb-1.5">
+                    District <span className="text-red-400 ml-0.5">*</span>
                   </label>
                   <select
                     required
                     value={form.district}
                     onChange={(e) => setForm({ ...form, district: e.target.value })}
-                    className="h-10 rounded-ds-md border border-ds-muted/30 bg-ds-surface px-3 text-sm text-ds-foreground focus:outline-none focus:ring-2 focus:ring-ds-primary"
+                    className="h-10 rounded-xl border border-[rgba(247,241,225,0.2)] bg-[#0B2E22] px-3 text-sm text-[#F7F1E1] focus:outline-none focus:ring-2 focus:ring-[#E7A93B]"
                   >
-                    <option value="">Select district</option>
+                    <option value="" className="bg-[#0B2E22]">Select district</option>
                     {['Dhaka', 'Chittagong', 'Sylhet', 'Rajshahi', 'Khulna', 'Barisal', 'Mymensingh', 'Rangpur'].map((d) => (
-                      <option key={d}>{d}</option>
+                      <option key={d} className="bg-[#0B2E22]">{d}</option>
                     ))}
                   </select>
                 </div>
                 <div className="sm:col-span-2">
-                  <label className="block text-sm font-medium text-ds-foreground leading-none mb-2">
+                  <label className="block text-sm font-medium text-[#F7F1E1] leading-none mb-2">
                     Skills & Interests
                   </label>
                   <div className="flex flex-wrap gap-2">
@@ -223,12 +240,12 @@ export default function Volunteers() {
                       <button
                         key={id}
                         type="button"
-                        className={`inline-flex items-center gap-1.5 rounded-ds-full border px-3 py-1.5 text-xs font-medium transition-colors duration-ds-fast ${
-                          activeSkill === id
-                            ? 'border-ds-primary bg-ds-primary text-white'
-                            : 'border-ds-muted/20 bg-ds-background text-ds-muted hover:border-ds-primary/40 hover:text-ds-primary'
+                        className={`inline-flex items-center gap-1.5 rounded-full border px-3 py-1.5 text-xs font-medium transition-colors ${
+                          selectedSkill === id
+                            ? 'border-[#D6472C] bg-[#D6472C] text-white'
+                            : 'border-[rgba(247,241,225,0.18)] bg-[#0B2E22] text-[rgba(247,241,225,0.7)] hover:border-[#E7A93B] hover:text-[#E7A93B]'
                         }`}
-                        onClick={() => setActiveSkill(id)}
+                        onClick={() => setSelectedSkill(id)}
                       >
                         <Icon size={12} />
                         {label}
@@ -248,18 +265,25 @@ export default function Volunteers() {
                   />
                 </div>
                 <div className="sm:col-span-2 flex gap-3">
-                  <Button type="submit" leftIcon={submitting ? Loader2 : UserPlus} disabled={submitting}>
+                  <button 
+                    type="submit" 
+                    disabled={submitting}
+                    className="inline-flex items-center gap-2 rounded-xl bg-[#D6472C] px-5 py-2.5 text-sm font-semibold text-white hover:bg-[#b83a22] disabled:opacity-50"
+                  >
+                    {submitting ? <Loader2 size={16} className="animate-spin" /> : <UserPlus size={16} />}
                     {submitting ? 'Creating Account…' : 'Complete Registration'}
-                  </Button>
-                  <Button type="button" variant="ghost" onClick={() => { setShowForm(false); setFormError(null); }} disabled={submitting}>
+                  </button>
+                  <button 
+                    type="button" 
+                    onClick={() => { setShowForm(false); setFormError(null); }} 
+                    disabled={submitting}
+                    className="rounded-xl border border-[rgba(247,241,225,0.2)] px-5 py-2.5 text-sm font-medium text-[rgba(247,241,225,0.7)] hover:bg-[rgba(247,241,225,0.08)]"
+                  >
                     Cancel
-                  </Button>
+                  </button>
                 </div>
               </form>
-                </>
-              
-                </>
-              
+              </>
             )}
           </motion.section>
         )}
@@ -267,7 +291,7 @@ export default function Volunteers() {
         {/* ── Volunteer directory ───────────────────────────────────────────── */}
         <section>
           <div className="mb-6 flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
-            <h2 className="font-display text-2xl font-bold text-ds-foreground">Volunteer Directory</h2>
+            <h2 className="font-display text-2xl font-bold text-[#F7F1E1] tracking-tight">Volunteer Directory</h2>
             <SearchInput
               placeholder="Search volunteers…"
               value={search}
@@ -280,7 +304,11 @@ export default function Volunteers() {
           <div className="mb-5 flex flex-wrap gap-2">
             <button
               onClick={() => setActiveSkill('all')}
-              className={`rounded-ds-full border px-3 py-1.5 text-sm font-medium transition-colors duration-ds-fast ${activeSkill === 'all' ? 'border-ds-primary bg-ds-primary text-white' : 'border-ds-muted/20 bg-ds-surface text-ds-muted hover:border-ds-primary/40 hover:text-ds-primary'}`}
+              className={`rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
+                activeSkill === 'all' 
+                  ? 'border-[#D6472C] bg-[#D6472C] text-white' 
+                  : 'border-[rgba(247,241,225,0.18)] bg-[#0F3A2B] text-[rgba(247,241,225,0.7)] hover:border-[#E7A93B] hover:text-[#E7A93B]'
+              }`}
             >
               All Skills
             </button>
@@ -288,7 +316,11 @@ export default function Volunteers() {
               <button
                 key={id}
                 onClick={() => setActiveSkill(id)}
-                className={`inline-flex items-center gap-1.5 rounded-ds-full border px-3 py-1.5 text-sm font-medium transition-colors duration-ds-fast ${activeSkill === id ? 'border-ds-primary bg-ds-primary text-white' : 'border-ds-muted/20 bg-ds-surface text-ds-muted hover:border-ds-primary/40 hover:text-ds-primary'}`}
+                className={`inline-flex items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-sm font-medium transition-colors ${
+                  activeSkill === id 
+                    ? 'border-[#D6472C] bg-[#D6472C] text-white' 
+                    : 'border-[rgba(247,241,225,0.18)] bg-[#0F3A2B] text-[rgba(247,241,225,0.7)] hover:border-[#E7A93B] hover:text-[#E7A93B]'
+                }`}
               >
                 <Icon size={13} />
                 {label}
@@ -305,44 +337,45 @@ export default function Volunteers() {
                 whileInView="show"
                 viewport={{ once: true }}
                 custom={i}
-                className="flex flex-col gap-4 rounded-ds-xl border border-ds-muted/10 bg-ds-surface p-5 shadow-ds-sm hover:shadow-ds-md transition-all duration-ds-normal"
+                style={{ background: '#0F3A2B', borderColor: 'rgba(247,241,225,0.14)' }}
+                className="flex flex-col gap-4 rounded-2xl border p-5 shadow-lg hover:border-[rgba(231,169,59,0.3)] transition-all"
               >
                 <div className="flex items-center gap-3">
-                  <div className="flex h-12 w-12 items-center justify-center rounded-ds-full bg-ds-primary/10 text-sm font-bold text-ds-primary">
+                  <div className="flex h-12 w-12 items-center justify-center rounded-xl bg-[#E7A93B]/15 border border-[#E7A93B]/30 text-sm font-bold text-[#E7A93B]">
                     {v.name.split(' ').map((n) => n[0]).join('')}
                   </div>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-1.5">
-                      <span className="font-semibold text-ds-foreground truncate">{v.name}</span>
-                      <ShieldCheck size={14} className="shrink-0 text-ds-primary" />
+                      <span className="font-semibold text-[#F7F1E1] truncate">{v.name}</span>
+                      <ShieldCheck size={14} className="shrink-0 text-[#E7A93B]" />
                     </div>
-                    <div className="flex items-center gap-1 text-xs text-ds-muted">
+                    <div className="flex items-center gap-1 text-xs text-[rgba(247,241,225,0.65)]">
                       <MapPin size={11} />
                       {v.district}
                     </div>
                   </div>
-                  <span className={`shrink-0 rounded-ds-full px-2 py-0.5 text-xs font-medium ${v.available ? 'bg-ds-success/10 text-ds-success' : 'bg-ds-muted/10 text-ds-muted'}`}>
+                  <span className={`shrink-0 rounded-full px-2.5 py-0.5 text-xs font-medium border ${v.available ? 'bg-emerald-500/10 text-emerald-400 border-emerald-500/20' : 'bg-white/5 text-white/50 border-white/10'}`}>
                     {v.available ? 'Available' : 'Busy'}
                   </span>
                 </div>
 
-                <div className="grid grid-cols-3 gap-2 rounded-ds-lg bg-ds-background p-3 text-center text-xs">
+                <div style={{ background: 'rgba(11,46,34,0.6)', borderColor: 'rgba(247,241,225,0.1)' }} className="grid grid-cols-3 gap-2 rounded-xl border p-3 text-center text-xs">
                   <div>
-                    <p className="font-bold text-ds-foreground text-base">{v.hours}</p>
-                    <p className="text-ds-muted flex items-center justify-center gap-0.5"><Clock size={10} />hrs</p>
+                    <p className="font-bold text-[#F7F1E1] text-base">{v.hours}</p>
+                    <p className="text-[rgba(247,241,225,0.6)] flex items-center justify-center gap-0.5"><Clock size={10} />hrs</p>
                   </div>
                   <div>
-                    <p className="font-bold text-ds-foreground text-base">{v.badges}</p>
-                    <p className="text-ds-muted flex items-center justify-center gap-0.5"><Award size={10} />badges</p>
+                    <p className="font-bold text-[#F7F1E1] text-base">{v.badges}</p>
+                    <p className="text-[rgba(247,241,225,0.6)] flex items-center justify-center gap-0.5"><Award size={10} />badges</p>
                   </div>
                   <div>
-                    <p className="font-bold text-ds-foreground text-base">{v.rating}</p>
-                    <p className="text-ds-muted flex items-center justify-center gap-0.5"><Star size={10} />rating</p>
+                    <p className="font-bold text-[#F7F1E1] text-base">{v.rating}</p>
+                    <p className="text-[rgba(247,241,225,0.6)] flex items-center justify-center gap-0.5"><Star size={10} />rating</p>
                   </div>
                 </div>
 
                 <div className="flex items-center gap-2">
-                  <span className={`inline-flex items-center gap-1 rounded-ds-full px-2.5 py-1 text-xs font-medium ${SKILLS.find((s) => s.id === v.skill)?.color ?? 'bg-ds-muted/10 text-ds-muted'}`}>
+                  <span className="inline-flex items-center gap-1 rounded-full border border-[#3E7A8C]/30 bg-[#3E7A8C]/15 px-2.5 py-1 text-xs font-medium text-[#3E7A8C]">
                     {(() => {
                       const sk = SKILLS.find((s) => s.id === v.skill);
                       const Icon = sk?.icon;
@@ -350,15 +383,15 @@ export default function Volunteers() {
                     })()}
                     {SKILLS.find((s) => s.id === v.skill)?.label}
                   </span>
-                  <span className="ml-auto text-xs text-ds-muted flex items-center gap-1">
-                    <Zap size={11} className="text-ds-warning" />
+                  <span className="ml-auto text-xs text-[rgba(247,241,225,0.6)] flex items-center gap-1">
+                    <Zap size={11} className="text-[#E7A93B]" />
                     Since {v.joined}
                   </span>
                 </div>
 
-                <Button variant="outline" size="sm" fullWidth leftIcon={Download}>
-                  View Portfolio
-                </Button>
+                <button className="w-full inline-flex items-center justify-center gap-2 rounded-xl border border-[rgba(247,241,225,0.18)] bg-transparent py-2 text-xs font-semibold text-[#F7F1E1] hover:bg-[rgba(247,241,225,0.08)] transition-colors">
+                  <Download size={13} /> View Portfolio
+                </button>
               </motion.div>
             ))}
           </div>

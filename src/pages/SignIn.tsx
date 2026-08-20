@@ -238,11 +238,7 @@ export default function SignIn() {
       </div>
 
       {/* ── Social login ─────────────────────────────────────────────────── */}
-      <div className="grid grid-cols-2 gap-3">
-        {(['google', 'facebook'] as const).map(provider => (
-          <SocialButton key={provider} provider={provider} />
-        ))}
-      </div>
+      <SocialButtonRow from={from} />
 
       {/* ── Test accounts hint ───────────────────────────────────────────── */}
       <details className="mt-5 rounded-lg" style={{ border: '1px dashed rgba(247,241,225,0.12)' }}>
@@ -372,54 +368,90 @@ export default function SignIn() {
   );
 }
 
-// ─── Social button (Google / Facebook) ───────────────────────────────────────
-function SocialButton({ provider }: { provider: 'google' | 'facebook' }) {
-  const [loading, setLoading] = useState(false);
+// ─── Social buttons row (Google + Facebook) ─────────────────────────────────
+function SocialButtonRow({ from }: { from: string }) {
+  const [loading,  setLoading]  = useState<'google' | 'facebook' | null>(null);
+  const [error,    setError]    = useState('');
+  const { login }               = useAuth();
+  const navigate                = useNavigate();
 
-  const handleClick = () => {
-    // Social OAuth is not wired to a real provider yet — show a coming-soon toast
-    alert(`${provider === 'google' ? 'Google' : 'Facebook'} OAuth is not configured yet. Use email/password to sign in.`);
+  const handleClick = async (provider: 'google' | 'facebook') => {
+    setLoading(provider);
+    setError('');
+    try {
+      // Call backend stub social auth — creates/finds account automatically
+      const { data } = await (await import('@/services/api')).api.post('/auth/social', { provider });
+      const token = data.token || data.data?.token || '';
+      const user  = data.user  || data.data?.user  || data;
+      // Store token directly — skip re-authenticating with password
+      localStorage.setItem('shebabd_token', token);
+      localStorage.setItem('shebabd_user', JSON.stringify(user));
+      // Trigger auth context refresh by calling login with stored token
+      window.dispatchEvent(new Event('shebabd-auth-updated'));
+      navigate(from, { replace: true });
+    } catch (err: any) {
+      const detail = err?.response?.data?.detail;
+      const errors = err?.response?.data?.errors;
+      const msg = Array.isArray(errors)
+        ? errors.map((e: any) => e.message).join(', ')
+        : detail || 'Social sign-in unavailable. Please use email & password.';
+      setError(msg);
+    } finally {
+      setLoading(null);
+    }
   };
 
   return (
-    <button
-      type="button"
-      disabled={loading}
-      onClick={handleClick}
-      className="flex items-center justify-center gap-2.5 rounded-lg py-2.5 text-sm font-medium transition-all duration-200 disabled:opacity-50"
-      style={{
-        background : 'rgba(247,241,225,0.05)',
-        border     : '1px solid rgba(247,241,225,0.12)',
-        color      : 'rgba(247,241,225,0.7)',
-        cursor     : 'pointer',
-      }}
-      onMouseEnter={e => {
-        e.currentTarget.style.background   = 'rgba(247,241,225,0.09)';
-        e.currentTarget.style.borderColor  = 'rgba(247,241,225,0.22)';
-      }}
-      onMouseLeave={e => {
-        e.currentTarget.style.background  = 'rgba(247,241,225,0.05)';
-        e.currentTarget.style.borderColor = 'rgba(247,241,225,0.12)';
-      }}
-    >
-      {loading
-        ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
-        : provider === 'google'
-          ? (
-            <svg width="17" height="17" viewBox="0 0 48 48">
-              <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
-              <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
-              <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
-              <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
-            </svg>
-          ) : (
-            <svg width="17" height="17" viewBox="0 0 48 48">
-              <path fill="#1877F2" d="M48 24C48 10.745 37.255 0 24 0S0 10.745 0 24c0 11.979 8.776 21.908 20.25 23.708V30.937h-6.094V24h6.094v-5.288c0-6.014 3.583-9.337 9.065-9.337 2.625 0 5.372.469 5.372.469v5.906h-3.026c-2.981 0-3.911 1.85-3.911 3.75V24h6.656l-1.063 6.937H27.75v16.771C39.224 45.908 48 35.979 48 24z"/>
-              <path fill="#fff" d="M33.343 30.937 34.406 24H27.75v-4.5c0-1.9.93-3.75 3.911-3.75h3.026v-5.906s-2.747-.469-5.372-.469c-5.482 0-9.065 3.323-9.065 9.337V24h-6.094v6.937h6.094v16.771a24.16 24.16 0 0 0 7.5 0V30.937h5.593z"/>
-            </svg>
-          )
-      }
-      {provider === 'google' ? 'Google' : 'Facebook'}
-    </button>
+    <div className="flex flex-col gap-2">
+      <div className="grid grid-cols-2 gap-3">
+        {(['google', 'facebook'] as const).map(provider => (
+          <button
+            key={provider}
+            type="button"
+            disabled={loading !== null}
+            onClick={() => handleClick(provider)}
+            className="flex items-center justify-center gap-2.5 rounded-lg py-2.5 text-sm font-medium transition-all duration-200 disabled:opacity-60"
+            style={{
+              background: 'rgba(247,241,225,0.05)',
+              border:     '1px solid rgba(247,241,225,0.12)',
+              color:      'rgba(247,241,225,0.7)',
+              cursor:     loading !== null ? 'not-allowed' : 'pointer',
+            }}
+            onMouseEnter={e => {
+              if (loading) return;
+              e.currentTarget.style.background  = 'rgba(247,241,225,0.09)';
+              e.currentTarget.style.borderColor = 'rgba(247,241,225,0.22)';
+            }}
+            onMouseLeave={e => {
+              e.currentTarget.style.background  = 'rgba(247,241,225,0.05)';
+              e.currentTarget.style.borderColor = 'rgba(247,241,225,0.12)';
+            }}
+          >
+            {loading === provider
+              ? <div className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+              : provider === 'google'
+                ? (
+                  <svg width="17" height="17" viewBox="0 0 48 48">
+                    <path fill="#EA4335" d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z"/>
+                    <path fill="#4285F4" d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z"/>
+                    <path fill="#FBBC05" d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z"/>
+                    <path fill="#34A853" d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z"/>
+                  </svg>
+                ) : (
+                  <svg width="17" height="17" viewBox="0 0 48 48">
+                    <path fill="#1877F2" d="M48 24C48 10.745 37.255 0 24 0S0 10.745 0 24c0 11.979 8.776 21.908 20.25 23.708V30.937h-6.094V24h6.094v-5.288c0-6.014 3.583-9.337 9.065-9.337 2.625 0 5.372.469 5.372.469v5.906h-3.026c-2.981 0-3.911 1.85-3.911 3.75V24h6.656l-1.063 6.937H27.75v16.771C39.224 45.908 48 35.979 48 24z"/>
+                    <path fill="#fff" d="M33.343 30.937 34.406 24H27.75v-4.5c0-1.9.93-3.75 3.911-3.75h3.026v-5.906s-2.747-.469-5.372-.469c-5.482 0-9.065 3.323-9.065 9.337V24h-6.094v6.937h6.094v16.771a24.16 24.16 0 0 0 7.5 0V30.937h5.593z"/>
+                  </svg>
+                )
+            }
+            {provider === 'google' ? 'Google' : 'Facebook'}
+          </button>
+        ))}
+      </div>
+      {/* Error shown below both buttons — doesn't break the grid */}
+      {error && (
+        <p className="text-center text-xs" style={{ color: '#f87171' }}>{error}</p>
+      )}
+    </div>
   );
 }
