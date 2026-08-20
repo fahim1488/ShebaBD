@@ -379,7 +379,7 @@ function OrgCard({ org }: { org: Organization }) {
         flexDirection: 'column',
         gap: 16,
         boxShadow: '0 20px 40px -24px rgba(0,0,0,0.5)',
-        borderTop: `3px solid ${org.catColor}`,
+        borderTop: `3px solid ${catColor}`,
         transition: 'transform 0.22s ease, box-shadow 0.22s ease',
         cursor: 'default',
       }}
@@ -453,3 +453,4 @@ function OrgCard({ org }: { org: Organization }) {
     </div>
   );
 }
+/* Alif: Organizations page */ 
