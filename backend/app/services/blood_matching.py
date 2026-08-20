@@ -1,1 +1,3 @@
-/* Fahim: Improved blood matching */ 
+"""
+blood_matching.py — Blood donor matching service for ShebaBD.
+"""

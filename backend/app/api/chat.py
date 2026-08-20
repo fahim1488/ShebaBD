@@ -79,16 +79,32 @@ async def chat(
     4. Persist the assistant reply (and any tool metadata).
     5. Return the reply.
     """
+    # ── 0. Input validation and sanitization ──────────────────────────────────
+    if not body.message or not body.message.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Message cannot be empty",
+        )
+    
+    # Sanitize message: strip excessive whitespace and limit length
+    sanitized_message = body.message.strip()[:10000]  # Max 10k chars
+    
+    if len(sanitized_message) < 1:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Message too short after sanitization",
+        )
+    
     # ── 1. Resolve / create conversation ─────────────────────────────────────
     conv, is_new = await get_or_create_conversation(
         db,
         user_id=user_id,
         conversation_id=body.conversation_id,
-        first_message=body.message,
+        first_message=sanitized_message,
     )
 
     # ── 2. Save user message ──────────────────────────────────────────────────
-    await add_message(db, conv.id, role="user", content=body.message)
+    await add_message(db, conv.id, role="user", content=sanitized_message)
 
     # ── 3. Build OpenAI message list ──────────────────────────────────────────
     db_messages  = await get_messages(db, conv.id)
@@ -165,16 +181,32 @@ async def chat_stream(
       data: {"type": "done",   "tokens": 123}
       data: [DONE]
     """
+    # ── 0. Input validation and sanitization ──────────────────────────────────
+    if not body.message or not body.message.strip():
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Message cannot be empty",
+        )
+    
+    # Sanitize message: strip excessive whitespace and limit length
+    sanitized_message = body.message.strip()[:10000]  # Max 10k chars
+    
+    if len(sanitized_message) < 1:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Message too short after sanitization",
+        )
+    
     # ── Resolve conversation ──────────────────────────────────────────────────
     conv, is_new = await get_or_create_conversation(
         db,
         user_id=user_id,
         conversation_id=body.conversation_id,
-        first_message=body.message,
+        first_message=sanitized_message,
     )
 
     # ── Save user message ─────────────────────────────────────────────────────
-    await add_message(db, conv.id, role="user", content=body.message)
+    await add_message(db, conv.id, role="user", content=sanitized_message)
     await db.commit()  # commit early so the message is visible immediately
 
     # ── Build message list ────────────────────────────────────────────────────
@@ -327,17 +359,40 @@ async def delete_history(
     tags=["System"],
 )
 async def health_check(db: AsyncSession = Depends(get_db)) -> HealthResponse:
-    # Ping the database
+    import time as _time
+    checks: dict[str, str] = {}
+
+    # ── Database connectivity + latency ──────────────────────────────────────
     db_status = "connected"
+    db_latency_ms: Optional[float] = None
     try:
+        t0 = _time.perf_counter()
         await db.execute(text("SELECT 1"))
+        db_latency_ms = round((_time.perf_counter() - t0) * 1000, 2)
+        checks["database"] = f"ok ({db_latency_ms}ms)"
     except Exception:
         logger.exception("Database health check failed")
         db_status = "disconnected"
+        checks["database"] = "error — cannot reach database"
 
-    # Check OpenAI key is configured
+    # ── Count active conversations ────────────────────────────────────────────
+    active_convs: Optional[int] = None
+    try:
+        from sqlalchemy import select, func as sqlfunc
+        from app.models import Conversation
+        result = await db.execute(
+            select(sqlfunc.count()).where(Conversation.is_active == True)  # noqa: E712
+        )
+        active_convs = result.scalar_one_or_none()
+        checks["conversations"] = f"{active_convs} active"
+    except Exception:
+        checks["conversations"] = "unavailable"
+
+    # ── OpenAI key check ─────────────────────────────────────────────────────
     oai_status = "configured" if settings.openai_api_key else "missing_key"
+    checks["openai"] = "api_key present" if oai_status == "configured" else "MISSING — set OPENAI_API_KEY"
 
+    # ── Overall status ───────────────────────────────────────────────────────
     overall = "ok" if db_status == "connected" and oai_status == "configured" else "degraded"
 
     return HealthResponse(
@@ -346,5 +401,8 @@ async def health_check(db: AsyncSession = Depends(get_db)) -> HealthResponse:
         environment=settings.app_env,
         database=db_status,
         openai=oai_status,
+        database_latency_ms=db_latency_ms,
+        active_conversations=active_convs,
+        checks=checks,
     )
-/* Fahim: AI chat enhancements */ 
+ 

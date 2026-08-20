@@ -146,6 +146,43 @@ TOOL_DEFINITIONS: List[Dict[str, Any]] = [
     {
         "type": "function",
         "function": {
+            "name": "getBloodAvailability",
+            "description": (
+                "Get real-time blood donor availability for a specific district and/or "
+                "blood group in Bangladesh. Returns: number of available donors, "
+                "unavailable donors, active blood requests, urgent requests, "
+                "top available donors (with masked phone), and overall availability status. "
+                "Use this whenever a user asks about blood availability, how many donors "
+                "are available, blood supply in a district, or needs a specific blood group "
+                "in a specific area (e.g. 'O+ blood in Dhaka', 'A- donors in Sylhet')."
+            ),
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "district": {
+                        "type": "string",
+                        "description": (
+                            "Bangladesh district name, e.g. 'Dhaka', 'Chittagong', "
+                            "'Sylhet', 'Rajshahi', 'Khulna', 'Barisal', 'Mymensingh', "
+                            "'Rangpur', 'Comilla', 'Narayanganj', 'Gazipur'. "
+                            "Omit to search all Bangladesh."
+                        ),
+                    },
+                    "blood_group": {
+                        "type": "string",
+                        "description": (
+                            "Blood group to filter by, e.g. 'A+', 'A-', 'B+', 'B-', "
+                            "'AB+', 'AB-', 'O+', 'O-'. Omit to show all groups."
+                        ),
+                    },
+                },
+                "required": [],
+            },
+        },
+    },
+    {
+        "type": "function",
+        "function": {
             "name": "getEmergencyContacts",
             "description": (
                 "Retrieve emergency hotline numbers and contacts available "
@@ -416,6 +453,158 @@ async def searchFAQ(
     return {"source": "mock", "faqs": (scored or faqs)[:limit]}
 
 
+async def getBloodAvailability(
+    district: Optional[str] = None,
+    blood_group: Optional[str] = None,
+) -> Dict[str, Any]:
+    """
+    Query real-time blood donor availability for a specific district and/or
+    blood group from the ShebaBD platform database.
+    Returns donor counts, active request counts, top available donors (masked),
+    and a human-readable availability status.
+    """
+    params: Dict[str, Any] = {"limit": 50, "available_only": False}
+    if blood_group:
+        params["blood_group"] = blood_group
+    if district and district.lower() not in ("all", "all districts", ""):
+        params["district"] = district
+
+    # ── Live call: GET /blood/donors ──────────────────────────────────────────
+    donor_data = await _api_get("/blood/donors", params)
+
+    # ── Live call: GET /blood/stats ───────────────────────────────────────────
+    stats_data = await _api_get("/blood/stats", {})
+
+    # ── Live call: GET /blood/requests ────────────────────────────────────────
+    req_params: Dict[str, Any] = {"limit": 20}
+    if blood_group:
+        req_params["blood_group"] = blood_group
+    if district:
+        req_params["hospital_district"] = district
+    request_data = await _api_get("/blood/requests", req_params)
+
+    # ── Process donors ────────────────────────────────────────────────────────
+    donors: List[Dict[str, Any]] = []
+    if isinstance(donor_data, list):
+        donors = donor_data
+    elif isinstance(donor_data, dict):
+        donors = donor_data.get("results", donor_data.get("donors", []))
+
+    available = [d for d in donors if d.get("is_available")]
+    unavailable = [d for d in donors if not d.get("is_available")]
+
+    # Break down by blood group
+    group_counts: Dict[str, int] = {}
+    for d in available:
+        g = d.get("blood_group", "Unknown")
+        group_counts[g] = group_counts.get(g, 0) + 1
+
+    # Top 5 available donors (mask phone for privacy: show last 4 digits)
+    top_donors = []
+    for d in available[:5]:
+        phone = d.get("phone", "")
+        masked = f"****{phone[-4:]}" if len(phone) >= 4 else "****"
+        top_donors.append({
+            "name":          d.get("name", "Anonymous"),
+            "blood_group":   d.get("blood_group", "?"),
+            "district":      d.get("district", district or "Unknown"),
+            "area":          d.get("area") or "",
+            "last_donated":  d.get("last_donated_at"),
+            "total_donations": d.get("total_donations", 0),
+            "phone_masked":  masked,
+            "is_verified":   d.get("is_verified", False),
+        })
+
+    # ── Process active requests ───────────────────────────────────────────────
+    requests: List[Dict[str, Any]] = []
+    if isinstance(request_data, list):
+        requests = request_data
+    elif isinstance(request_data, dict):
+        requests = request_data.get("results", request_data.get("requests", []))
+
+    active_requests = [r for r in requests if not r.get("is_fulfilled")]
+    urgent_requests = [r for r in active_requests if r.get("urgency") in ("urgent", "critical")]
+
+    req_summary = []
+    for r in active_requests[:3]:
+        req_summary.append({
+            "patient_name":      r.get("patient_name", "Patient"),
+            "blood_group":       r.get("blood_group", blood_group or "?"),
+            "hospital":          r.get("hospital_name", "Unknown hospital"),
+            "district":          r.get("hospital_district", district or "?"),
+            "urgency":           r.get("urgency", "normal"),
+            "units_needed":      r.get("units_needed", 1),
+            "contact_phone":     r.get("contact_phone", ""),
+        })
+
+    # ── Availability status ───────────────────────────────────────────────────
+    avail_count = len(available)
+    if avail_count == 0:
+        status_label = "critical"
+        status_msg   = "No available donors found right now. Emergency contacts advised."
+    elif avail_count <= 3:
+        status_label = "low"
+        status_msg   = f"Only {avail_count} donor(s) currently available. Urgent action recommended."
+    elif avail_count <= 10:
+        status_label = "moderate"
+        status_msg   = f"{avail_count} donors available. Moderate supply."
+    else:
+        status_label = "good"
+        status_msg   = f"{avail_count} donors available. Good supply in this area."
+
+    # ── Global stats (if available) ───────────────────────────────────────────
+    global_stats: Dict[str, Any] = {}
+    if isinstance(stats_data, dict):
+        global_stats = {
+            "total_donors":       stats_data.get("total_donors", 0),
+            "available_donors":   stats_data.get("available_donors", 0),
+            "active_requests":    stats_data.get("active_requests", 0),
+            "donors_by_group":    stats_data.get("donors_by_group", {}),
+        }
+
+    # ── Mock fallback if no live data ─────────────────────────────────────────
+    if not donors and not requests:
+        MOCK_DISTRICT = district or "Dhaka"
+        MOCK_GROUP    = blood_group or "O+"
+        return {
+            "source":           "mock",
+            "district":         MOCK_DISTRICT,
+            "blood_group":      MOCK_GROUP,
+            "availability_status": "moderate",
+            "status_message":   f"Demo data shown — backend may be offline. Typically 5-12 {MOCK_GROUP} donors active in {MOCK_DISTRICT}.",
+            "available_donors": 7,
+            "unavailable_donors": 3,
+            "donors_by_group":  {MOCK_GROUP: 7},
+            "active_requests":  2,
+            "urgent_requests":  1,
+            "top_donors": [
+                {"name": "Rahim Hossain",  "blood_group": MOCK_GROUP, "district": MOCK_DISTRICT, "area": "Mirpur", "last_donated": "2026-05-01", "total_donations": 5, "phone_masked": "****3210", "is_verified": True},
+                {"name": "Karim Uddin",    "blood_group": MOCK_GROUP, "district": MOCK_DISTRICT, "area": "Gulshan","last_donated": "2026-04-10", "total_donations": 3, "phone_masked": "****4422", "is_verified": False},
+                {"name": "Sumaiya Begum",  "blood_group": MOCK_GROUP, "district": MOCK_DISTRICT, "area": "Dhanmondi","last_donated": "2026-03-22","total_donations": 8, "phone_masked": "****9901", "is_verified": True},
+            ],
+            "active_request_summary": [
+                {"patient_name": "Nasrin Akter", "blood_group": MOCK_GROUP, "hospital": "Dhaka Medical College", "district": MOCK_DISTRICT, "urgency": "urgent", "units_needed": 2, "contact_phone": "01700-000001"},
+            ],
+            "global_stats":     {"total_donors": 1240, "available_donors": 430, "active_requests": 18},
+        }
+
+    return {
+        "source":              "live",
+        "district":            district or "All Bangladesh",
+        "blood_group":         blood_group or "All groups",
+        "availability_status": status_label,
+        "status_message":      status_msg,
+        "available_donors":    avail_count,
+        "unavailable_donors":  len(unavailable),
+        "donors_by_group":     group_counts,
+        "active_requests":     len(active_requests),
+        "urgent_requests":     len(urgent_requests),
+        "top_donors":          top_donors,
+        "active_request_summary": req_summary,
+        "global_stats":        global_stats,
+    }
+
+
 async def getOrganization(
     name: Optional[str] = None,
     id: Optional[str] = None,
@@ -523,11 +712,12 @@ async def webSearch(
 # ── Dispatcher ────────────────────────────────────────────────────────────────
 _TOOL_MAP = {
     "webSearch":            webSearch,
-    "findVolunteerEvents": findVolunteerEvents,
-    "findBloodRequests":   findBloodRequests,
-    "getEmergencyContacts":getEmergencyContacts,
-    "searchFAQ":           searchFAQ,
-    "getOrganization":     getOrganization,
+    "findVolunteerEvents":    findVolunteerEvents,
+    "findBloodRequests":      findBloodRequests,
+    "getBloodAvailability":   getBloodAvailability,
+    "getEmergencyContacts":   getEmergencyContacts,
+    "searchFAQ":              searchFAQ,
+    "getOrganization":        getOrganization,
 }
 
 

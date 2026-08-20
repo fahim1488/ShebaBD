@@ -36,6 +36,9 @@ DISTRICTS = [
     "Narayanganj", "Gazipur", "Bogra", "Dinajpur", "Feni",
 ]
 
+# Minimum days between blood donations (WHO standard)
+MIN_DONATION_INTERVAL_DAYS = 56
+
 
 # ── Stats ──────────────────────────────────────────────────────────────────────
 @router.get("/stats", response_model=BloodStatsResponse)
@@ -256,4 +259,4 @@ async def fulfill_blood_request(
     await db.commit()
     await db.refresh(req)
     return req
-/* Fahim: Blood donation endpoints */ 
+ 
