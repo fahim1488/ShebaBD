@@ -99,7 +99,11 @@ export const router = createBrowserRouter([
     element: <AuthLayout />,
     children: [
       { path: ROUTES.SIGN_IN, element: withSuspense(SignIn) },
+      { path: '/signin', element: withSuspense(SignIn) },
+      { path: '/login', element: withSuspense(SignIn) },
       { path: ROUTES.SIGN_UP, element: withSuspense(SignUp) },
+      { path: '/signup', element: withSuspense(SignUp) },
+      { path: '/register', element: withSuspense(SignUp) },
     ],
   },
 ]);
