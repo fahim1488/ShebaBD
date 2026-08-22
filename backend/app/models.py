@@ -14,6 +14,7 @@ import uuid as _uuid
 from datetime import datetime, timezone
 from decimal import Decimal
 from enum import Enum
+from typing import Optional
 
 from sqlalchemy import (
     Boolean,
@@ -559,6 +560,8 @@ class Event(Base):
     description: Mapped[str] = mapped_column(Text, nullable=False)
     date: Mapped[str] = mapped_column(String(100), nullable=False)
     time: Mapped[str] = mapped_column(String(100), nullable=False)
+    datetime_start: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True, index=True)
+    registration_deadline: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     location: Mapped[str] = mapped_column(String(500), nullable=False)
     organizer: Mapped[str] = mapped_column(String(255), nullable=False)
     capacity: Mapped[int] = mapped_column(Integer, nullable=False, default=100)
@@ -566,7 +569,19 @@ class Event(Base):
     tags: Mapped[str | None] = mapped_column(String(500), nullable=True)   # comma-separated
     is_featured: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
     is_active: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    is_cancelled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    reminder_minutes_before: Mapped[int] = mapped_column(Integer, nullable=False, default=1440)  # Default 24h
+    email_confirmation_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
+    reminder_enabled: Mapped[bool] = mapped_column(Boolean, nullable=False, default=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now(), default=_utcnow)
+
+    # Relationships
+    registrations: Mapped[list["EventRegistration"]] = relationship(
+        "EventRegistration",
+        back_populates="event",
+        cascade="all, delete-orphan",
+        lazy="selectin",
+    )
 
 
 class EventRegistration(Base):
@@ -574,11 +589,30 @@ class EventRegistration(Base):
     __tablename__ = "event_registrations"
 
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    event_id: Mapped[int] = mapped_column(Integer, ForeignKey("events.id", ondelete="CASCADE"), nullable=False, index=True)
+    event_id: Mapped[int] = mapped_column(
+        Integer, ForeignKey("events.id", ondelete="CASCADE"), nullable=False, index=True
+    )
+    user_id: Mapped[str | None] = mapped_column(
+        String(36), ForeignKey("users.id", ondelete="SET NULL"), nullable=True, index=True
+    )
     name: Mapped[str] = mapped_column(String(255), nullable=False)
-    email: Mapped[str] = mapped_column(String(255), nullable=False)
+    email: Mapped[str] = mapped_column(String(255), nullable=False, index=True)
     phone: Mapped[str | None] = mapped_column(String(20), nullable=True)
+    status: Mapped[str] = mapped_column(String(30), nullable=False, default="confirmed")  # confirmed, cancelled
+    confirmation_sent: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    confirmation_sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
+    reminder_sent: Mapped[bool] = mapped_column(Boolean, nullable=False, default=False)
+    reminder_sent_at: Mapped[datetime | None] = mapped_column(DateTime(timezone=True), nullable=True)
     created_at: Mapped[datetime] = mapped_column(DateTime(timezone=True), nullable=False, server_default=func.now(), default=_utcnow)
+
+    # Relationships
+    event: Mapped["Event"] = relationship("Event", back_populates="registrations")
+    user: Mapped[Optional["User"]] = relationship("User")
+
+    __table_args__ = (
+        Index("ix_event_reg_event_email", "event_id", "email"),
+        Index("ix_event_reg_event_user", "event_id", "user_id"),
+    )
 
 
 # ── Emergency Requests ────────────────────────────────────────────────────────

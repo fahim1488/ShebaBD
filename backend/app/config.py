@@ -58,6 +58,13 @@ class Settings(BaseSettings):
     # ── Rate limiting ────────────────────────────────────────────────────────
     rate_limit_per_minute: int = 30
 
+    # ── SMTP Configuration ───────────────────────────────────────────────────
+    smtp_host: str = "smtp.gmail.com"
+    smtp_port: int = 587
+    smtp_user: str = "mdfahimuntasir1488.csenub@gmail.com"
+    smtp_password: str = "encuselbefwkjhuh"
+    smtp_from: str = "mdfahimuntasir1488.csenub@gmail.com"
+
     # ── ShebaBD internal API (used by tool calling) ──────────────────────────
     shebabd_api_base_url: str = "http://localhost:8000/api/v1"
     shebabd_api_key: str = "internal-service-key"

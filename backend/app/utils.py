@@ -199,12 +199,35 @@ def configure_logging(level: str = "INFO") -> None:
     """
     Configure root logger with a structured format.
     Call once from main.py before the app starts.
+
+    Uses a UTF-8 StreamHandler explicitly to avoid UnicodeEncodeError on
+    Windows where the default console encoding is cp1252. Without this, any
+    log message containing unicode characters (e.g. emoji in SQL parameters)
+    would crash the logging thread, which FastAPI middleware catches as a
+    500 Internal Server Error.
     """
-    logging.basicConfig(
-        level=getattr(logging, level.upper(), logging.INFO),
-        format="%(asctime)s | %(levelname)-8s | %(name)s:%(lineno)d | %(message)s",
+    import sys
+
+    fmt = logging.Formatter(
+        "%(asctime)s | %(levelname)-8s | %(name)s:%(lineno)d | %(message)s",
         datefmt="%Y-%m-%d %H:%M:%S",
     )
+
+    # Force UTF-8 on the stream handler so emoji / Bengali text never crashes
+    handler = logging.StreamHandler(stream=sys.stdout)
+    handler.setFormatter(fmt)
+    try:
+        # Python 3.9+ supports reconfigure(); older versions may not.
+        if hasattr(sys.stdout, "reconfigure"):
+            sys.stdout.reconfigure(encoding="utf-8", errors="replace")
+    except Exception:
+        pass
+
+    root = logging.getLogger()
+    root.setLevel(getattr(logging, level.upper(), logging.INFO))
+    root.handlers.clear()
+    root.addHandler(handler)
+
     # Silence noisy third-party loggers
     for noisy in ("httpx", "httpcore", "openai._base_client"):
         logging.getLogger(noisy).setLevel(logging.WARNING)

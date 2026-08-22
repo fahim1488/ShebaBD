@@ -5,7 +5,7 @@ Keeps API contracts strict and auto-generates OpenAPI docs.
 """
 import uuid
 from datetime import datetime
-from typing import Any, Dict, List, Literal, Optional
+from typing import Any, Dict, List, Literal, Optional, Union
 
 from pydantic import BaseModel, Field, field_validator
 
@@ -528,30 +528,86 @@ class EventResponse(BaseModel):
     description: str
     date: str
     time: str
+    datetime_start: Optional[datetime] = None
+    registration_deadline: Optional[datetime] = None
     location: str
     organizer: str
     capacity: int
     registered_count: int
-    tags: Optional[str]
+    tags: Optional[str] = None
     is_featured: bool
     is_active: bool
+    is_cancelled: bool = False
+    reminder_minutes_before: int = 1440
+    email_confirmation_enabled: bool = True
+    reminder_enabled: bool = True
     created_at: datetime
+    is_registered: Optional[bool] = False
+    user_registration_id: Optional[Union[int, str]] = None
+
+
+class EventCreateRequest(BaseModel):
+    title: str = Field(..., min_length=3, max_length=500)
+    category: str = Field(..., min_length=2, max_length=100)
+    description: str = Field(..., min_length=10)
+    date: str = Field(..., min_length=2, max_length=100)
+    time: str = Field(..., min_length=2, max_length=100)
+    datetime_start: Optional[datetime] = None
+    registration_deadline: Optional[datetime] = None
+    location: str = Field(..., min_length=3, max_length=500)
+    organizer: str = Field(..., min_length=2, max_length=255)
+    capacity: int = Field(100, ge=1, le=100000)
+    tags: Optional[str] = None
+    is_featured: bool = False
+    reminder_minutes_before: int = Field(1440, ge=1)
+    email_confirmation_enabled: bool = True
+    reminder_enabled: bool = True
+
+
+class EventUpdateRequest(BaseModel):
+    title: Optional[str] = Field(None, min_length=3, max_length=500)
+    category: Optional[str] = Field(None, min_length=2, max_length=100)
+    description: Optional[str] = Field(None, min_length=10)
+    date: Optional[str] = None
+    time: Optional[str] = None
+    datetime_start: Optional[datetime] = None
+    registration_deadline: Optional[datetime] = None
+    location: Optional[str] = None
+    organizer: Optional[str] = None
+    capacity: Optional[int] = Field(None, ge=1, le=100000)
+    tags: Optional[str] = None
+    is_featured: Optional[bool] = None
+    is_active: Optional[bool] = None
+    is_cancelled: Optional[bool] = None
+    reminder_minutes_before: Optional[int] = Field(None, ge=1)
+    email_confirmation_enabled: Optional[bool] = None
+    reminder_enabled: Optional[bool] = None
 
 
 class EventRegistrationCreate(BaseModel):
-    name: str = Field(..., min_length=2, max_length=255)
-    email: str = Field(..., min_length=5, max_length=255)
+    name: Optional[str] = Field(None, max_length=255)
+    email: Optional[str] = Field(None, max_length=255)
     phone: Optional[str] = Field(None, max_length=20)
 
 
 class EventRegistrationResponse(BaseModel):
     model_config = {"from_attributes": True}
-    id: int
+    id: Union[int, str]
     event_id: int
+    user_id: Optional[str] = None
     name: str
     email: str
-    phone: Optional[str]
+    phone: Optional[str] = None
+    status: str
+    confirmation_sent: bool
+    confirmation_sent_at: Optional[datetime] = None
+    reminder_sent: bool
+    reminder_sent_at: Optional[datetime] = None
     created_at: datetime
+
+
+class EventRegistrationAdminResponse(EventRegistrationResponse):
+    event_title: Optional[str] = None
 
 
 # ── Emergency schemas ─────────────────────────────────────────────────────────

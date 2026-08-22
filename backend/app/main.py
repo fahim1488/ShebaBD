@@ -32,6 +32,7 @@ from app.api.emergency import router as emergency_router
 from app.api.organizations import router as organizations_router
 from app.config import get_settings
 from app.database import create_tables, dispose_engine
+from app.services.scheduler import start_scheduler, stop_scheduler
 from app.services.tools import close_http_client
 from app.utils import configure_logging
 
@@ -61,10 +62,14 @@ def create_app() -> FastAPI:
         logger.info("━━ ShebaBD AI Backend starting up (%s) ━━", settings.app_env)
         await create_tables()
         logger.info("✓ Database tables ready")
+        # Start automated event reminder scheduler
+        start_scheduler(check_interval_seconds=120)
+        logger.info("✓ Automated reminder scheduler running")
 
     @app.on_event("shutdown")
     async def on_shutdown() -> None:
         logger.info("━━ ShebaBD AI Backend shutting down ━━")
+        stop_scheduler()
         await close_http_client()
         await dispose_engine()
         logger.info("✓ Resources released")

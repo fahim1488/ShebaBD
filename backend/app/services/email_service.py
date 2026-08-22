@@ -12,29 +12,51 @@ import os
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 from typing import Optional
+from dotenv import load_dotenv
+
+load_dotenv()
 
 logger = logging.getLogger(__name__)
+
+import re
+from email.utils import formatdate, make_msgid
+from app.config import get_settings
 
 # Retry configuration
 MAX_RETRIES = 3
 RETRY_BASE_DELAY = 1.0   # seconds — doubles each attempt (1s, 2s, 4s)
 
-# SMTP settings from environment
-SMTP_HOST     = os.getenv("SMTP_HOST", "smtp.gmail.com")
-SMTP_PORT     = int(os.getenv("SMTP_PORT", "587"))
-SMTP_USER     = os.getenv("SMTP_USER", "")
-SMTP_PASSWORD = os.getenv("SMTP_PASSWORD", "")
-SMTP_FROM     = os.getenv("SMTP_FROM", "noreply@shebabd.org")
+
+def _strip_html(html_str: str) -> str:
+    """Strip HTML tags for plaintext email fallback."""
+    clean = re.sub(r"<style[\s\S]*?</style>", "", html_str)
+    clean = re.sub(r"<[^>]+>", " ", clean)
+    return re.sub(r"\s+", " ", clean).strip()
 
 
 def _build_message(to_email: str, subject: str, body: str, html: bool) -> MIMEMultipart:
-    """Build a MIME email message."""
+    """Build a standard-compliant RFC MIME email message with high inbox deliverability."""
+    settings = get_settings()
+    from_addr = settings.smtp_from or settings.smtp_user or "mdfahimuntasir1488.csenub@gmail.com"
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
-    msg["From"]    = SMTP_FROM
+    msg["From"]    = f"ShebaBD Support <{from_addr}>"
     msg["To"]      = to_email
-    part = MIMEText(body, "html" if html else "plain", "utf-8")
-    msg.attach(part)
+    msg["Date"]    = formatdate(localtime=True)
+    msg["Message-ID"] = make_msgid(domain="shebabd.org")
+
+    if html:
+        # Attach plain text version first (fallback for spam filters & accessibility)
+        plain_text = _strip_html(body)
+        part_text = MIMEText(plain_text, "plain", "utf-8")
+        msg.attach(part_text)
+        # Attach HTML version second (preferred rendering in modern clients)
+        part_html = MIMEText(body, "html", "utf-8")
+        msg.attach(part_html)
+    else:
+        part_text = MIMEText(body, "plain", "utf-8")
+        msg.attach(part_text)
+
     return msg
 
 
@@ -43,13 +65,20 @@ def _send_via_smtp(msg: MIMEMultipart, to_email: str) -> None:
     Send a message via SMTP (synchronous).
     Raises smtplib.SMTPException on failure.
     """
-    with smtplib.SMTP(SMTP_HOST, SMTP_PORT, timeout=10) as server:
+    settings = get_settings()
+    host = settings.smtp_host or "smtp.gmail.com"
+    port = settings.smtp_port or 587
+    user = settings.smtp_user or "mdfahimuntasir1488.csenub@gmail.com"
+    password = settings.smtp_password or "encuselbefwkjhuh"
+    from_addr = settings.smtp_from or user
+
+    with smtplib.SMTP(host, port, timeout=12) as server:
         server.ehlo()
         server.starttls()
         server.ehlo()
-        if SMTP_USER and SMTP_PASSWORD:
-            server.login(SMTP_USER, SMTP_PASSWORD)
-        server.sendmail(SMTP_FROM, to_email, msg.as_string())
+        if user and password:
+            server.login(user, password)
+        server.sendmail(user or from_addr, to_email, msg.as_string())
 
 
 async def send_email(
@@ -61,9 +90,6 @@ async def send_email(
 ) -> bool:
     """
     Send an email with exponential backoff retry logic.
-
-    In development (no SMTP_USER configured) the email content is logged
-    instead of sent so the app works without SMTP setup.
 
     Args:
         to_email: Recipient email address
@@ -79,10 +105,11 @@ async def send_email(
         logger.error("Invalid recipient email address: %r", to_email)
         return False
 
+    settings = get_settings()
     msg = _build_message(to_email, subject, body, html)
 
-    # Development mode: log instead of sending
-    if not SMTP_USER:
+    # If no SMTP configured in dev
+    if not settings.smtp_user and not os.getenv("SMTP_USER"):
         logger.info(
             "[DEV] Email NOT sent — SMTP_USER not configured.\n"
             "  To: %s\n  Subject: %s\n  Body preview: %.200s",
@@ -203,3 +230,153 @@ async def send_blood_request_notification(
         body,
         html=True,
     )
+
+
+async def send_event_confirmation_email(
+    email: str,
+    user_name: str,
+    event_title: str,
+    event_date: str,
+    event_time: str,
+    event_location: str,
+    registration_id: str,
+    organizer: str = "ShebaBD Community",
+) -> bool:
+    """Send a structured event registration confirmation email to the user."""
+    short_reg_id = str(registration_id)[:8].upper()
+    body = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f8; margin: 0; padding: 20px; color: #1e293b; }}
+        .container {{ max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }}
+        .header {{ background: #0F3A2B; color: #F7F1E1; padding: 30px 24px; text-align: center; }}
+        .header h1 {{ margin: 0 0 8px; font-size: 24px; color: #E7A93B; }}
+        .header p {{ margin: 0; font-size: 14px; opacity: 0.9; }}
+        .badge {{ display: inline-block; background: rgba(231,169,59,0.18); color: #E7A93B; border: 1px solid #E7A93B; padding: 4px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; margin-top: 10px; }}
+        .content {{ padding: 30px 24px; }}
+        .greeting {{ font-size: 16px; margin-bottom: 20px; }}
+        .card {{ background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 8px; padding: 18px; margin-bottom: 24px; }}
+        .detail-row {{ display: flex; padding: 8px 0; border-bottom: 1px solid #edf2f7; font-size: 14px; }}
+        .detail-row:last-child {{ border-bottom: none; }}
+        .detail-label {{ width: 120px; font-weight: 600; color: #64748b; }}
+        .detail-value {{ flex: 1; color: #0f172a; font-weight: 500; }}
+        .ticket {{ background: #0F3A2B; color: #F7F1E1; border-radius: 8px; padding: 14px 20px; text-align: center; margin: 20px 0; }}
+        .ticket-code {{ font-family: monospace; font-size: 20px; font-weight: bold; color: #E7A93B; letter-spacing: 2px; }}
+        .footer {{ text-align: center; padding: 20px; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; }}
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>Registration Confirmed! 🎉</h1>
+          <p>You are officially registered for the event</p>
+          <span class="badge">CONFIRMED PASS</span>
+        </div>
+        <div class="content">
+          <p class="greeting">Hello <strong>{user_name}</strong>,</p>
+          <p>Thank you for registering! Here are your event and registration details:</p>
+          
+          <div class="card">
+            <table width="100%" cellpadding="6" cellspacing="0" style="font-size: 14px;">
+              <tr><td style="color: #64748b; width: 110px;"><strong>Event:</strong></td><td style="color: #0f172a; font-weight: bold;">{event_title}</td></tr>
+              <tr><td style="color: #64748b;"><strong>Date:</strong></td><td>{event_date}</td></tr>
+              <tr><td style="color: #64748b;"><strong>Time:</strong></td><td>{event_time}</td></tr>
+              <tr><td style="color: #64748b;"><strong>Location:</strong></td><td>{event_location}</td></tr>
+              <tr><td style="color: #64748b;"><strong>Organizer:</strong></td><td>{organizer}</td></tr>
+            </table>
+          </div>
+
+          <div class="ticket">
+            <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1px; color: rgba(247,241,225,0.7);">Registration Pass Code</div>
+            <div class="ticket-code">SHEBA-{short_reg_id}</div>
+          </div>
+
+          <p style="font-size: 13px; color: #64748b; margin-top: 20px;">
+            ℹ️ We'll send you an automated reminder before the event begins. If you cannot attend, please cancel your registration from the ShebaBD portal so others can take part.
+          </p>
+        </div>
+        <div class="footer">
+          <p>ShebaBD Social Impact Platform · Bangladesh</p>
+          <p>This is an automated message. For questions, reach out to support@shebabd.org</p>
+        </div>
+      </div>
+    </body>
+    </html>
+    """
+    return await send_email(
+        email,
+        f"Registration Confirmed: {event_title} — ShebaBD",
+        body,
+        html=True,
+    )
+
+
+async def send_event_reminder_email(
+    email: str,
+    user_name: str,
+    event_title: str,
+    event_date: str,
+    event_time: str,
+    event_location: str,
+    time_left_display: str = "soon",
+) -> bool:
+    """Send an automated reminder email for an upcoming event."""
+    body = f"""
+    <!DOCTYPE html>
+    <html>
+    <head>
+      <meta charset="utf-8">
+      <style>
+        body {{ font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; background-color: #f4f6f8; margin: 0; padding: 20px; color: #1e293b; }}
+        .container {{ max-width: 600px; margin: 0 auto; background: #ffffff; border-radius: 12px; overflow: hidden; box-shadow: 0 4px 12px rgba(0,0,0,0.06); }}
+        .header {{ background: #0F3A2B; color: #F7F1E1; padding: 26px 24px; text-align: center; }}
+        .header h1 {{ margin: 0 0 8px; font-size: 22px; color: #E7A93B; }}
+        .header p {{ margin: 0; font-size: 14px; color: #F7F1E1; }}
+        .content {{ padding: 28px 24px; }}
+        .greeting {{ font-size: 16px; margin-bottom: 16px; }}
+        .card {{ background: #fffbeb; border: 1px solid #fef3c7; border-radius: 8px; padding: 18px; margin-bottom: 20px; }}
+        .cta {{ display: block; text-align: center; background: #D6472C; color: #ffffff; text-decoration: none; padding: 12px 24px; border-radius: 8px; font-weight: bold; margin-top: 24px; }}
+        .footer {{ text-align: center; padding: 20px; font-size: 12px; color: #94a3b8; border-top: 1px solid #e2e8f0; }}
+      </style>
+    </head>
+    <body>
+      <div class="container">
+        <div class="header">
+          <h1>⏰ Upcoming Event Reminder</h1>
+          <p>{event_title} starts {time_left_display}!</p>
+        </div>
+        <div class="content">
+          <p class="greeting">Hello <strong>{user_name}</strong>,</p>
+          <p>This is a quick reminder that you are registered for an upcoming event on ShebaBD.</p>
+          
+          <div class="card">
+            <table width="100%" cellpadding="6" cellspacing="0" style="font-size: 14px;">
+              <tr><td style="color: #92400e; width: 100px;"><strong>Event:</strong></td><td style="color: #78350f; font-weight: bold;">{event_title}</td></tr>
+              <tr><td style="color: #92400e;"><strong>Date:</strong></td><td style="color: #78350f;">{event_date}</td></tr>
+              <tr><td style="color: #92400e;"><strong>Time:</strong></td><td style="color: #78350f;">{event_time}</td></tr>
+              <tr><td style="color: #92400e;"><strong>Location:</strong></td><td style="color: #78350f;">{event_location}</td></tr>
+            </table>
+          </div>
+
+          <p style="font-size: 14px; color: #475569;">
+            We look forward to seeing you there. Please arrive a few minutes early to check in smoothly.
+          </p>
+        </div>
+        <div class="footer">
+          <p>ShebaBD Social Impact Platform · Bangladesh</p>
+          <p>If you have questions or can no longer attend, please visit ShebaBD.</p>
+        </div>
+      </div>
+    </body>
+    </html>
+    """
+    return await send_email(
+        email,
+        f"Reminder: {event_title} is coming up! — ShebaBD",
+        body,
+        html=True,
+    )
+
