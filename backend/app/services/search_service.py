@@ -135,3 +135,4 @@ async def global_search(db: AsyncSession, query: str) -> dict[str, list[dict]]:
         "events":        [e.to_dict() for e in events],
         "total":         len(donors) + len(orgs) + len(events),
     }
+# Murad: Multi-entity search aggregation

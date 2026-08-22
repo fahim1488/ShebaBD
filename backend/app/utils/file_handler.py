@@ -65,3 +65,4 @@ def get_upload_path(subfolder: str, filename: str) -> Path:
 def get_file_size_mb(size_bytes: int) -> float:
     """Convert bytes to megabytes rounded to 2 decimal places."""
     return round(size_bytes / (1024 * 1024), 2)
+# Murad: Upload MIME validation

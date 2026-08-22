@@ -651,3 +651,4 @@ class OrganizationResponse(BaseModel):
     color_hex: str
     is_verified: bool
     created_at: datetime
+# Murad: Schema validators

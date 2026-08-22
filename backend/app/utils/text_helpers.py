@@ -65,3 +65,4 @@ def highlight_match(text: str, query: str) -> str:
         return text
     pattern = re.compile(re.escape(query.strip()), re.IGNORECASE)
     return pattern.sub(lambda m: f"<mark>{m.group()}</mark>", text)
+# Murad: HTML sanitizer and slugifier
