@@ -69,4 +69,3 @@ export function usePagination({
     pageNumbers,
   };
 }
-// Murad: Skipped offset math

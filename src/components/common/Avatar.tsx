@@ -48,4 +48,3 @@ export default function Avatar({ name, size = 'md', color = '#3E7A8C', src, veri
     </div>
   );
 }
-// Murad: Initials fallback

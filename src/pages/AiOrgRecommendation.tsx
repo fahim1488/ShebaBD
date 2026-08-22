@@ -511,4 +511,3 @@ export default function AiOrgRecommendation() {
     </div>
   );
 }
-// Murad: NGO trust rating card

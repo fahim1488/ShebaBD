@@ -612,4 +612,3 @@ export default function Profile() {
     </div>
   );
 }
-// Murad: Member badges

@@ -19,8 +19,15 @@ import {
   QrCode,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { initiatePayment, verifyPayment } from '@/services/donationApi';
-import { DonationStatus, type Donation, type PaymentInitiateResponse } from '@/types/donation';
+import { 
+  initiateNagadPayment, 
+  verifyNagadPayment, 
+  queryNagadPaymentStatus,
+  type NagadInitiateResponse,
+  type NagadCompleteResponse,
+  type NagadVerifyResponse,
+} from '@/services/nagadService';
+import type { Donation } from '@/types/donation';
 
 interface NagadPaymentProps {
   donation: Donation;
@@ -37,6 +44,11 @@ type PaymentStep =
   | 'completed' 
   | 'failed';
 
+interface PaymentData {
+  initiateResponse: NagadInitiateResponse;
+  completeResponse: NagadCompleteResponse;
+}
+
 export const NagadPayment: React.FC<NagadPaymentProps> = ({
   donation,
   onSuccess,
@@ -44,8 +56,8 @@ export const NagadPayment: React.FC<NagadPaymentProps> = ({
   onCancel,
 }) => {
   const [step, setStep] = useState<PaymentStep>('initiating');
-  const [paymentData, setPaymentData] = useState<PaymentInitiateResponse | null>(null);
-  const [verificationData, setVerificationData] = useState<any | null>(null);
+  const [paymentData, setPaymentData] = useState<PaymentData | null>(null);
+  const [verificationData, setVerificationData] = useState<NagadVerifyResponse | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState<number>(1200); // 20 minutes for Nagad
@@ -73,7 +85,12 @@ export const NagadPayment: React.FC<NagadPaymentProps> = ({
     const initializePayment = async () => {
       try {
         setStep('initiating');
-        const response = await initiatePayment(donation.id);
+        
+        const response = await initiateNagadPayment(
+          donation.amount,
+          donation.id
+        );
+        
         setPaymentData(response);
         setStep('redirecting');
       } catch (err) {
@@ -85,7 +102,7 @@ export const NagadPayment: React.FC<NagadPaymentProps> = ({
     };
 
     initializePayment();
-  }, [donation.id, onError]);
+  }, [donation.amount, donation.id, onError]);
 
   const handleCopy = async (text: string, type: string) => {
     try {
@@ -98,8 +115,8 @@ export const NagadPayment: React.FC<NagadPaymentProps> = ({
   };
 
   const handleOpenNagad = () => {
-    if (paymentData?.payment_url) {
-      window.open(paymentData.payment_url, '_blank');
+    if (paymentData?.completeResponse.checkoutURL) {
+      window.open(paymentData.completeResponse.checkoutURL, '_blank');
       setStep('processing');
     }
   };
@@ -109,30 +126,35 @@ export const NagadPayment: React.FC<NagadPaymentProps> = ({
 
     try {
       setStep('verifying');
-      await verifyPayment(donation.id, { status: DonationStatus.COMPLETED });
+      const result = await verifyNagadPayment(
+        paymentData.initiateResponse.paymentReferenceId,
+        paymentData.initiateResponse.challenge
+      );
       
-      const result = {
-        status: 'Success',
-        paymentReferenceId: paymentData.provider_transaction_id,
-        orderId: paymentData.transaction_id,
-        amount: paymentData.amount,
-        paymentDateTime: new Date().toISOString(),
-        issuerPaymentRefNo: paymentData.provider_transaction_id,
-        clientMobileNo: '01XXXXXXXXX',
-      };
       setVerificationData(result);
 
-      setStep('completed');
-      onSuccess({
-        provider: 'nagad',
-        paymentReferenceId: paymentData.provider_transaction_id,
-        orderId: paymentData.transaction_id,
-        amount: paymentData.amount,
-        status: 'Success',
-        paymentDateTime: new Date().toISOString(),
-        issuerPaymentRefNo: paymentData.provider_transaction_id,
-        clientMobileNo: '01XXXXXXXXX',
-      });
+      if (result.status === 'Success') {
+        setStep('completed');
+        onSuccess({
+          provider: 'nagad',
+          paymentReferenceId: result.paymentReferenceId,
+          orderId: result.orderId,
+          amount: result.amount,
+          status: result.status,
+          paymentDateTime: result.paymentDateTime,
+          issuerPaymentRefNo: result.issuerPaymentRefNo,
+          clientMobileNo: result.clientMobileNo,
+        });
+      } else {
+        setStep('failed');
+        const failureReason = result.status === 'Cancelled' 
+          ? 'Payment was cancelled by user'
+          : result.status === 'Aborted'
+          ? 'Payment was aborted'
+          : 'Payment failed during processing';
+        setError(failureReason);
+        onError(failureReason);
+      }
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Payment verification failed';
       setError(errorMessage);
@@ -145,28 +167,25 @@ export const NagadPayment: React.FC<NagadPaymentProps> = ({
     if (!paymentData) return;
 
     try {
-      await verifyPayment(donation.id, { status: DonationStatus.COMPLETED });
+      const result = await queryNagadPaymentStatus(
+        paymentData.initiateResponse.paymentReferenceId
+      );
       
-      const result = {
-        status: 'Success',
-        paymentReferenceId: paymentData.provider_transaction_id,
-        amount: paymentData.amount,
-        paymentDateTime: new Date().toISOString(),
-        issuerPaymentRefNo: paymentData.provider_transaction_id,
-        clientMobileNo: '01XXXXXXXXX',
-      };
-      setVerificationData(result);
-
-      setStep('completed');
-      onSuccess({
-        provider: 'nagad',
-        paymentReferenceId: paymentData.provider_transaction_id,
-        amount: paymentData.amount,
-        status: 'Success',
-        paymentDateTime: new Date().toISOString(),
-        issuerPaymentRefNo: paymentData.provider_transaction_id,
-        clientMobileNo: '01XXXXXXXXX',
-      });
+      if (result.status === 'Success') {
+        setStep('completed');
+        onSuccess({
+          provider: 'nagad',
+          paymentReferenceId: paymentData.initiateResponse.paymentReferenceId,
+          amount: result.amount,
+          status: result.status,
+          paymentDateTime: result.paymentDateTime,
+          issuerPaymentRefNo: result.issuerPaymentRefNo,
+          clientMobileNo: result.clientMobileNo,
+        });
+      } else if (result.status === 'Failed') {
+        setStep('failed');
+        setError('Payment failed');
+      }
     } catch (err) {
       console.error('Query payment failed:', err);
     }
@@ -271,10 +290,10 @@ export const NagadPayment: React.FC<NagadPaymentProps> = ({
                     <span className="text-ds-muted">Payment Reference:</span>
                     <div className="flex items-center gap-2">
                       <code className="bg-ds-muted/10 px-2 py-1 rounded text-xs">
-                        {paymentData.provider_transaction_id}
+                        {paymentData.initiateResponse.paymentReferenceId}
                       </code>
                       <button
-                        onClick={() => handleCopy(paymentData.provider_transaction_id, 'reference')}
+                        onClick={() => handleCopy(paymentData.initiateResponse.paymentReferenceId, 'reference')}
                         className="text-ds-primary hover:text-ds-primary/80"
                       >
                         <Copy size={14} />
@@ -353,7 +372,7 @@ export const NagadPayment: React.FC<NagadPaymentProps> = ({
                     Waiting for payment completion
                   </p>
                   <p className="text-xs text-amber-700 mt-1">
-                    Reference: {paymentData.provider_transaction_id}
+                    Reference: {paymentData.initiateResponse.paymentReferenceId}
                   </p>
                 </div>
 

@@ -11,7 +11,6 @@ import {
   ChevronRight, TrendingUp,
 } from 'lucide-react';
 import { useLanguage } from '@/hooks/useLanguage';
-import { useAuth } from '@/hooks/useAuth';
 import { checkHealth, streamChat } from '@/services/chatApi';
 
 // ─── Design tokens ────────────────────────────────────────────────────────────
@@ -74,18 +73,20 @@ interface BloodCardData {
 
 // ─── Quick-reply chips ────────────────────────────────────────────────────────
 const QUICK_EN = [
-  '🩸 Find O+ Blood in Dhaka',
-  '🚨 Emergency Hotlines',
-  '🏢 Find Verified NGOs',
-  '🤝 Volunteer Events',
-  '💳 How to Donate',
+  '🩸 O+ blood in Dhaka',
+  '🩸 A- donors in Sylhet',
+  '🩸 B+ in Chittagong',
+  '🤝 Volunteer events',
+  '🚨 Emergency contacts',
+  '🌐 Search live web',
 ];
 const QUICK_BN = [
-  '🩸 ঢাকায় O+ রক্তের খবরাখবর',
-  '🚨 জরুরী সহায়তা হটলাইন',
-  '🏢 নিবন্ধিত এনজিও তালিকা',
+  '🩸 ঢাকায় O+ রক্ত',
+  '🩸 সিলেটে A- দাতা',
+  '🩸 চট্টগ্রামে B+ রক্ত',
   '🤝 স্বেচ্ছাসেবক ইভেন্ট',
-  '💳 অনুদান দেয়ার পদ্ধতি',
+  '🚨 জরুরি যোগাযোগ',
+  '🌐 ইন্টারনেট সার্চ',
 ];
 
 // ─── Status config ────────────────────────────────────────────────────────────
@@ -474,7 +475,6 @@ const newId = () => `msg-${++msgCounter}-${Date.now()}`;
 // ─── Main component ───────────────────────────────────────────────────────────
 export function AiAssistant() {
   const { lang, toggleLang } = useLanguage();
-  const { user } = useAuth();
   const [open,      setOpen]      = useState(false);
   const [unread,    setUnread]    = useState(1);
   const [online,    setOnline]    = useState<boolean | null>(null);
@@ -489,17 +489,13 @@ export function AiAssistant() {
   const convIdRef = useRef<string | null>(null);
 
   // ── Welcome message ───────────────────────────────────────────────────────
-  const welcomeMsg = useCallback((): ChatMessage => {
-    const greeting = user?.name ? `Hello **${user.name}**!` : 'Hello!';
-    const greetingBn = user?.name ? `হ্যালো **${user.name}**!` : 'হ্যালো!';
-    return {
-      id: 'welcome',
-      role: 'assistant',
-      content: lang === 'en'
-        ? `${greeting} I'm **Sheba AI Assistant** 🤖 — How can I help you today?\n\nAsk me about **district blood availability**, emergency hotlines, verified NGOs, or volunteer drives.`
-        : `${greetingBn} আমি **শেবা AI সহকারী** 🤖 — আপনাকে কিভাবে সাহায্য করতে পারি?\n\n**যেকোনো জেলায় রক্তের প্রাপ্যতা**, জরুরি হটলাইন বা নিবন্ধিত এনজিও সম্পর্কে প্রশ্ন করুন।`,
-    };
-  }, [lang, user?.name]);
+  const welcomeMsg = useCallback((): ChatMessage => ({
+    id: 'welcome',
+    role: 'assistant',
+    content: lang === 'en'
+      ? "Hi! I'm **Sheba AI** 🩸 — Ask me about **blood availability in any district**, volunteer events, NGOs, or anything else!\n\n**Try:** *\"O+ blood in Dhaka\"* or *\"How many A- donors in Sylhet?\"*"
+      : 'হ্যালো! আমি **শেবা AI** 🩸 — যেকোনো জেলায় **রক্তের প্রাপ্যতা**, স্বেচ্ছাসেবক ইভেন্ট বা যেকোনো প্রশ্ন করুন!\n\n**চেষ্টা করুন:** *"ঢাকায় O+ রক্ত"* বা *"সিলেটে A- দাতা কতজন?"*',
+  }), [lang]);
 
   useEffect(() => { setMessages([welcomeMsg()]); }, []); // eslint-disable-line
   useEffect(() => { checkHealth().then(ok => setOnline(ok)); }, []);
@@ -726,37 +722,13 @@ export function AiAssistant() {
                 return (
                   <div key={msg.id} className={`flex gap-2 ${isBot ? 'flex-row' : 'flex-row-reverse'}`}>
                     {/* Avatar */}
-                    {isBot ? (
-                      <div className="flex items-center justify-center rounded-full flex-shrink-0"
-                        style={{ width: 28, height: 28, background: `${MARIG}22`, border: `1.5px solid ${MARIG}66` }}>
-                        <Bot size={15} style={{ color: MARIG }} />
-                      </div>
-                    ) : user?.avatar ? (
-                      <div className="rounded-full flex-shrink-0 border shadow-sm"
-                        style={{ 
-                          width: 28, 
-                          height: 28, 
-                          background: `url(${user.avatar}) center/cover`,
-                          borderColor: `${SKY}88`
-                        }} 
-                      />
-                    ) : user?.name ? (
-                      <div className="flex items-center justify-center rounded-full flex-shrink-0 font-bold text-[11px]"
-                        style={{ 
-                          width: 28, 
-                          height: 28, 
-                          background: `${SKY}33`, 
-                          border: `1.5px solid ${SKY}88`,
-                          color: PAPER
-                        }}>
-                        {user.name.charAt(0).toUpperCase()}
-                      </div>
-                    ) : (
-                      <div className="flex items-center justify-center rounded-full flex-shrink-0"
-                        style={{ width: 28, height: 28, background: `${SKY}22`, border: `1.5px solid ${SKY}55` }}>
-                        <User size={13} style={{ color: SKY }} />
-                      </div>
-                    )}
+                    <div className="flex items-end justify-center rounded-full flex-shrink-0"
+                      style={{ width: 28, height: 28, background: isBot ? `${DISC}22` : `${SKY}22`, border: `1.5px solid ${isBot ? DISC + '55' : SKY + '55'}` }}>
+                      {isBot
+                        ? <Droplets size={13} style={{ color: DISC }} />
+                        : <User size={13} style={{ color: SKY }} />
+                      }
+                    </div>
 
                     {/* Bubble */}
                     <div style={{ maxWidth: '85%' }}>
@@ -786,7 +758,7 @@ export function AiAssistant() {
                             <div className="flex items-center gap-[4px] py-1">
                               {[0, 1, 2].map(i => (
                                 <motion.span key={i} className="block rounded-full"
-                                  style={{ width: 6, height: 6, background: MARIG }}
+                                  style={{ width: 6, height: 6, background: DISC }}
                                   animate={{ scale: [1, 1.5, 1], opacity: [0.4, 1, 0.4] }}
                                   transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.2 }}
                                 />
@@ -802,13 +774,9 @@ export function AiAssistant() {
                         )}
                       </div>
 
-                      <p className="font-mono-ibm text-[10px] mt-1 px-1 flex items-center gap-1.5"
-                        style={{ color: MUTED, justifyContent: isBot ? 'flex-start' : 'flex-end' }}>
-                        <span className="font-semibold" style={{ color: isBot ? MARIG : SKY }}>
-                          {isBot ? 'Sheba AI' : (user?.name || 'You')}
-                        </span>
-                        <span>•</span>
-                        <span>{nowTs()}</span>
+                      <p className="font-mono-ibm text-[10px] mt-1 px-1"
+                        style={{ color: MUTED, textAlign: isBot ? 'left' : 'right' }}>
+                        {nowTs()}
                       </p>
                     </div>
                   </div>
@@ -818,16 +786,16 @@ export function AiAssistant() {
               {/* Typing dots */}
               {isLoading && messages[messages.length - 1]?.role === 'user' && (
                 <div className="flex gap-2 flex-row">
-                  <div className="flex items-center justify-center rounded-full flex-shrink-0"
-                    style={{ width: 28, height: 28, background: `${MARIG}22`, border: `1.5px solid ${MARIG}66` }}>
-                    <Bot size={15} style={{ color: MARIG }} />
+                  <div className="flex items-end justify-center rounded-full flex-shrink-0"
+                    style={{ width: 28, height: 28, background: `${DISC}22`, border: `1.5px solid ${DISC}55` }}>
+                    <Droplets size={13} style={{ color: DISC }} />
                   </div>
                   <div className="px-3 py-2"
                     style={{ background: INK2, border: `1px solid ${LINE}`, borderRadius: '4px 12px 12px 12px' }}>
                     <div className="flex items-center gap-[4px] py-1">
                       {[0, 1, 2].map(i => (
                         <motion.span key={i} className="block rounded-full"
-                          style={{ width: 6, height: 6, background: MARIG }}
+                          style={{ width: 6, height: 6, background: DISC }}
                           animate={{ scale: [1, 1.5, 1], opacity: [0.4, 1, 0.4] }}
                           transition={{ duration: 0.8, repeat: Infinity, delay: i * 0.2 }}
                         />
