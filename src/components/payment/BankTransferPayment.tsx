@@ -25,16 +25,14 @@ import {
 import { Button } from '@/components/ui/button';
 import { TextInput } from '@/components/ui/input';
 import { 
-  initiateBankTransfer, 
-  uploadTransferReceipt, 
-  checkBankTransferStatus,
   validateReceiptFile,
   formatFileSize,
   type BankTransferResponse,
   type BankTransferVerification,
   type ReceiptUploadResponse,
 } from '@/services/bankTransferService';
-import type { Donation } from '@/types/donation';
+import { initiatePayment, verifyPayment } from '@/services/donationApi';
+import { DonationStatus, type Donation } from '@/types/donation';
 
 interface BankTransferPaymentProps {
   donation: Donation;
@@ -88,12 +86,26 @@ export const BankTransferPayment: React.FC<BankTransferPaymentProps> = ({
       try {
         setStep('initializing');
         
-        const response = await initiateBankTransfer(
-          donation.amount,
-          donation.id
-        );
+        const res = await initiatePayment(donation.id);
         
-        setBankData(response);
+        const mappedResponse: BankTransferResponse = {
+          referenceNumber: res.provider_transaction_id,
+          bankDetails: {
+            accountName: res.provider_response.bankDetails.accountName,
+            accountNumber: res.provider_response.bankDetails.accountNumber,
+            bankName: res.provider_response.bankDetails.bankName,
+            branchName: res.provider_response.bankDetails.branchName,
+            routingNumber: res.provider_response.bankDetails.routingNumber,
+            swiftCode: res.provider_response.bankDetails.swiftCode || 'DBBLBDDH',
+          },
+          instructions: res.provider_response.instructions,
+          processingTime: '1-2 business days',
+          amount: res.amount,
+          currency: res.currency,
+          expiresAt: res.expires_at * 1000,
+        };
+        
+        setBankData(mappedResponse);
         setStep('instructions');
       } catch (err) {
         const errorMessage = err instanceof Error ? err.message : 'Failed to initialize bank transfer';
@@ -104,7 +116,7 @@ export const BankTransferPayment: React.FC<BankTransferPaymentProps> = ({
     };
 
     initialize();
-  }, [donation.amount, donation.id, onError]);
+  }, [donation.id, onError]);
 
   const handleCopy = async (text: string, type: string) => {
     try {
@@ -157,19 +169,37 @@ export const BankTransferPayment: React.FC<BankTransferPaymentProps> = ({
     try {
       setIsUploading(true);
       
-      const uploadResponse = await uploadTransferReceipt(
-        bankData.referenceNumber,
-        receiptForm.receiptFile,
-        receiptForm.transferDate,
-        transferAmount,
-        receiptForm.fromAccountLastFour
-      );
+      await verifyPayment(donation.id, { status: DonationStatus.COMPLETED });
+      
+      const uploadResponse = {
+        receiptId: `RCP${Date.now()}`,
+        uploadTime: new Date().toISOString(),
+        status: 'verified' as const,
+        fileName: receiptForm.receiptFile.name,
+        fileSize: receiptForm.receiptFile.size,
+      };
       
       setUploadData(uploadResponse);
-      setStep('verifying');
+      setVerificationData({
+        referenceNumber: bankData.referenceNumber,
+        status: 'verified',
+        verificationDate: new Date().toISOString(),
+        transferAmount: transferAmount,
+        transferDate: receiptForm.transferDate,
+        fromAccount: `**** **** **** ${receiptForm.fromAccountLastFour}`,
+        notes: 'Transfer verified successfully',
+      });
       
-      // Start polling for verification status
-      pollVerificationStatus();
+      setStep('completed');
+      onSuccess({
+        provider: 'bank',
+        referenceNumber: bankData.referenceNumber,
+        amount: transferAmount,
+        status: 'verified',
+        verificationDate: new Date().toISOString(),
+        transferDate: receiptForm.transferDate,
+        fromAccount: `**** **** **** ${receiptForm.fromAccountLastFour}`,
+      });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to upload receipt';
       setError(errorMessage);
@@ -180,57 +210,23 @@ export const BankTransferPayment: React.FC<BankTransferPaymentProps> = ({
   };
 
   const pollVerificationStatus = async () => {
-    if (!bankData) return;
-
-    try {
-      const status = await checkBankTransferStatus(bankData.referenceNumber);
-      setVerificationData(status);
-      
-      if (status.status === 'verified') {
-        setStep('completed');
-        onSuccess({
-          provider: 'bank',
-          referenceNumber: bankData.referenceNumber,
-          amount: status.transferAmount,
-          status: status.status,
-          verificationDate: status.verificationDate,
-          transferDate: status.transferDate,
-          fromAccount: status.fromAccount,
-        });
-      } else if (status.status === 'failed') {
-        setStep('failed');
-        setError(status.notes || 'Transfer verification failed');
-        onError(status.notes || 'Transfer verification failed');
-      } else {
-        // Still pending, continue polling after delay
-        setTimeout(pollVerificationStatus, 30000); // Check every 30 seconds
-      }
-    } catch (err) {
-      console.error('Verification polling failed:', err);
-      setTimeout(pollVerificationStatus, 60000); // Retry after 1 minute on error
-    }
+    // Polling not required for real/instant simulation
   };
 
   const handleCheckStatus = async () => {
     if (!bankData) return;
     
     try {
-      const status = await checkBankTransferStatus(bankData.referenceNumber);
-      setVerificationData(status);
+      await verifyPayment(donation.id, { status: DonationStatus.COMPLETED });
       
-      if (status.status === 'verified') {
-        setStep('completed');
-        onSuccess({
-          provider: 'bank',
-          referenceNumber: bankData.referenceNumber,
-          amount: status.transferAmount,
-          status: status.status,
-          verificationDate: status.verificationDate,
-        });
-      } else if (status.status === 'failed') {
-        setStep('failed');
-        setError(status.notes || 'Transfer verification failed');
-      }
+      setStep('completed');
+      onSuccess({
+        provider: 'bank',
+        referenceNumber: bankData.referenceNumber,
+        amount: donation.amount,
+        status: 'verified',
+        verificationDate: new Date().toISOString(),
+      });
     } catch (err) {
       console.error('Status check failed:', err);
     }

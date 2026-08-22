@@ -18,68 +18,45 @@ import {
 /* ── Payment provider logos — local image assets ─────────────────────────── */
 
 const BkashLogo = () => (
-  <div className="flex items-center gap-2.5">
-    <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#E2136E] via-[#D12053] to-[#990033] shadow-md shadow-pink-500/25 ring-1 ring-pink-400/40">
-      <svg viewBox="0 0 24 24" className="h-6 w-6 fill-white drop-shadow">
-        <path d="M2.5 12L12 2.5L21.5 12L12 21.5L2.5 12Z" fill="none" stroke="white" strokeWidth="1.5" opacity="0.3" />
-        <path d="M12 3.5L4 12L12 17.5L20 12L12 3.5Z" fill="white" />
-        <path d="M12 6.5L7 12L12 15L17 12L12 6.5Z" fill="#E2136E" />
-      </svg>
+  <div className="flex items-center gap-2.5 h-10">
+    <div className="flex h-10 items-center justify-center rounded-lg bg-white px-2 shadow-sm ring-1 ring-pink-500/20">
+      <img src="/bkash-logo.svg" alt="bKash" className="h-6 w-auto object-contain" />
     </div>
     <div className="flex flex-col">
-      <div className="flex items-center gap-1.5">
-        <span className="font-display text-base font-black tracking-tight text-ds-foreground">
-          bKash
-        </span>
-        <span className="rounded bg-pink-500/10 px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase text-pink-500 border border-pink-500/20">
-          Fast Pay
-        </span>
-      </div>
-      <span className="text-[10px] font-medium text-ds-muted">bKash Mobile Wallet</span>
+      <span className="rounded bg-pink-500/10 px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase text-pink-400 border border-pink-500/20 w-fit">
+        Wallet
+      </span>
+      <span className="text-[10px] font-medium text-ds-muted mt-0.5">Mobile Pay</span>
     </div>
   </div>
 );
 
 const NagadLogo = () => (
-  <div className="flex items-center gap-2.5">
-    <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#F73E1E] via-[#E62E05] to-[#B31D00] shadow-md shadow-orange-500/25 ring-1 ring-orange-400/40">
-      <svg viewBox="0 0 24 24" className="h-6 w-6 text-white" fill="currentColor">
-        <path d="M12 2C12 2 14.5 5.5 14.5 8C14.5 9.5 13.5 10.5 12 10.5C10.5 10.5 9.5 9.5 9.5 8C9.5 5.5 12 2 12 2Z" fill="white" opacity="0.9"/>
-        <path d="M12 7C14.5 10.5 18 12.5 18 16C18 19.31 15.31 22 12 22C8.69 22 6 19.31 6 16C6 12.5 9.5 10.5 12 7Z" fill="white"/>
-        <circle cx="12" cy="16" r="3" fill="#E62E05"/>
-      </svg>
+  <div className="flex items-center gap-2.5 h-10">
+    <div className="flex h-10 items-center justify-center rounded-lg bg-white px-2 shadow-sm ring-1 ring-orange-500/20">
+      <img src="/nagad-logo.svg" alt="Nagad" className="h-6 w-auto object-contain" />
     </div>
     <div className="flex flex-col">
-      <div className="flex items-center gap-1.5">
-        <span className="font-display text-base font-black tracking-tight text-ds-foreground">
-          Nagad
-        </span>
-        <span className="rounded bg-orange-500/10 px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase text-orange-500 border border-orange-500/20">
-          নগদ
-        </span>
-      </div>
-      <span className="text-[10px] font-medium text-ds-muted">Instant Digital Pay</span>
+      <span className="rounded bg-orange-500/10 px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase text-orange-400 border border-orange-500/20 w-fit">
+        নগদ
+      </span>
+      <span className="text-[10px] font-medium text-ds-muted mt-0.5">Instant Pay</span>
     </div>
   </div>
 );
 
 const BankLogo = () => (
-  <div className="flex items-center gap-2.5">
-    <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#1E3A8A] via-[#2563EB] to-[#1D4ED8] shadow-md shadow-blue-500/25 ring-1 ring-blue-400/40">
-      <svg viewBox="0 0 24 24" className="h-6 w-6 text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+  <div className="flex items-center gap-2.5 h-10">
+    <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-gradient-to-br from-blue-600 to-indigo-700 text-white shadow-sm ring-1 ring-blue-500/30">
+      <svg viewBox="0 0 24 24" className="h-5 w-5 text-white" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
         <path d="M3 21h18M3 10h18M5 10v11M9 10v11M15 10v11M19 10v11M12 3L2 8h20l-10-5z" />
       </svg>
     </div>
     <div className="flex flex-col">
-      <div className="flex items-center gap-1.5">
-        <span className="font-display text-base font-black tracking-tight text-ds-foreground">
-          Bank Pay
-        </span>
-        <span className="rounded bg-blue-500/10 px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase text-blue-500 border border-blue-500/20">
-          EFT / Online
-        </span>
-      </div>
-      <span className="text-[10px] font-medium text-ds-muted">Direct Bank Transfer</span>
+      <span className="rounded bg-blue-500/10 px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase text-blue-400 border border-blue-500/20 w-fit">
+        EFT
+      </span>
+      <span className="text-[10px] font-medium text-ds-muted mt-0.5">Direct Transfer</span>
     </div>
   </div>
 );

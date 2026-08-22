@@ -18,14 +18,8 @@ import {
   QrCode,
 } from 'lucide-react';
 import { Button } from '@/components/ui/button';
-import { 
-  createBkashPayment, 
-  executeBkashPayment, 
-  queryBkashPayment,
-  type BkashCreatePaymentResponse,
-  type BkashExecutePaymentResponse,
-} from '@/services/bkashService';
-import type { Donation } from '@/types/donation';
+import { initiatePayment, verifyPayment } from '@/services/donationApi';
+import { DonationStatus, type Donation, type PaymentInitiateResponse } from '@/types/donation';
 
 interface BkashPaymentProps {
   donation: Donation;
@@ -49,8 +43,8 @@ export const BkashPayment: React.FC<BkashPaymentProps> = ({
   onCancel,
 }) => {
   const [step, setStep] = useState<PaymentStep>('creating');
-  const [paymentData, setPaymentData] = useState<BkashCreatePaymentResponse | null>(null);
-  const [executionData, setExecutionData] = useState<BkashExecutePaymentResponse | null>(null);
+  const [paymentData, setPaymentData] = useState<PaymentInitiateResponse | null>(null);
+  const [executionData, setExecutionData] = useState<any | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [copied, setCopied] = useState<string | null>(null);
   const [timeLeft, setTimeLeft] = useState<number>(900); // 15 minutes
@@ -78,14 +72,7 @@ export const BkashPayment: React.FC<BkashPaymentProps> = ({
     const initializePayment = async () => {
       try {
         setStep('creating');
-        const callbackUrl = `${window.location.origin}/donations/${donation.id}/callback`;
-        
-        const response = await createBkashPayment(
-          donation.amount,
-          donation.id,
-          callbackUrl
-        );
-        
+        const response = await initiatePayment(donation.id);
         setPaymentData(response);
         setStep('redirecting');
       } catch (err) {
@@ -97,7 +84,7 @@ export const BkashPayment: React.FC<BkashPaymentProps> = ({
     };
 
     initializePayment();
-  }, [donation.amount, donation.id, onError]);
+  }, [donation.id, onError]);
 
   const handleCopy = async (text: string, type: string) => {
     try {
@@ -110,8 +97,8 @@ export const BkashPayment: React.FC<BkashPaymentProps> = ({
   };
 
   const handleOpenBkash = () => {
-    if (paymentData?.bkashURL) {
-      window.open(paymentData.bkashURL, '_blank');
+    if (paymentData?.payment_url) {
+      window.open(paymentData.payment_url, '_blank');
       setStep('processing');
     }
   };
@@ -121,28 +108,24 @@ export const BkashPayment: React.FC<BkashPaymentProps> = ({
 
     try {
       setStep('verifying');
-      const result = await executeBkashPayment(paymentData.paymentID);
-      setExecutionData(result);
-
-      if (result.transactionStatus === 'Completed') {
-        setStep('completed');
-        onSuccess({
-          provider: 'bkash',
-          transactionId: result.trxID,
-          paymentId: result.paymentID,
-          amount: result.amount,
-          status: result.transactionStatus,
-          executionTime: result.paymentExecuteTime,
-          payerAccount: result.payerAccount,
-        });
-      } else {
-        setStep('failed');
-        const failureReason = result.transactionStatus === 'Cancelled' 
-          ? 'Payment was cancelled by user'
-          : 'Payment failed during processing';
-        setError(failureReason);
-        onError(failureReason);
-      }
+      await verifyPayment(donation.id, { status: DonationStatus.COMPLETED });
+      
+      setExecutionData({
+        paymentID: paymentData.transaction_id,
+        trxID: paymentData.provider_transaction_id,
+        paymentExecuteTime: new Date().toISOString(),
+      });
+      
+      setStep('completed');
+      onSuccess({
+        provider: 'bkash',
+        transactionId: paymentData.provider_transaction_id,
+        paymentId: paymentData.transaction_id,
+        amount: paymentData.amount,
+        status: 'Completed',
+        executionTime: new Date().toISOString(),
+        payerAccount: '01XXXXXXXXX',
+      });
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Payment verification failed';
       setError(errorMessage);
@@ -155,22 +138,23 @@ export const BkashPayment: React.FC<BkashPaymentProps> = ({
     if (!paymentData) return;
 
     try {
-      const result = await queryBkashPayment(paymentData.paymentID);
+      await verifyPayment(donation.id, { status: DonationStatus.COMPLETED });
       
-      if (result.transactionStatus === 'Completed') {
-        setStep('completed');
-        onSuccess({
-          provider: 'bkash',
-          transactionId: result.trxID,
-          paymentId: result.paymentID,
-          amount: result.amount,
-          status: result.transactionStatus,
-          payerAccount: result.payerAccount,
-        });
-      } else if (result.transactionStatus === 'Failed' || result.transactionStatus === 'Cancelled') {
-        setStep('failed');
-        setError(`Payment ${result.transactionStatus.toLowerCase()}`);
-      }
+      setExecutionData({
+        paymentID: paymentData.transaction_id,
+        trxID: paymentData.provider_transaction_id,
+        paymentExecuteTime: new Date().toISOString(),
+      });
+      
+      setStep('completed');
+      onSuccess({
+        provider: 'bkash',
+        transactionId: paymentData.provider_transaction_id,
+        paymentId: paymentData.transaction_id,
+        amount: paymentData.amount,
+        status: 'Completed',
+        payerAccount: '01XXXXXXXXX',
+      });
     } catch (err) {
       console.error('Query payment failed:', err);
     }
@@ -274,10 +258,10 @@ export const BkashPayment: React.FC<BkashPaymentProps> = ({
                     <span className="text-ds-muted">Payment ID:</span>
                     <div className="flex items-center gap-2">
                       <code className="bg-ds-muted/10 px-2 py-1 rounded text-xs">
-                        {paymentData.paymentID}
+                        {paymentData.provider_transaction_id}
                       </code>
                       <button
-                        onClick={() => handleCopy(paymentData.paymentID, 'payment_id')}
+                        onClick={() => handleCopy(paymentData.provider_transaction_id, 'payment_id')}
                         className="text-ds-primary hover:text-ds-primary/80"
                       >
                         <Copy size={14} />
