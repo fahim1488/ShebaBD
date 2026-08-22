@@ -314,3 +314,4 @@ export default function Events() {
   );
 }
 /* Murad: Events page integration */ 
+// Murad: Event debounced search

@@ -774,3 +774,4 @@ export default function AiSmartSearch() {
     </div>
   );
 }
+// Murad: Cross-entity search UI

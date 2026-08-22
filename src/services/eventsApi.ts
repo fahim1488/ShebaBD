@@ -43,3 +43,4 @@ export const registerForEvent = async (
   const res = await api.post(`/events/${eventId}/register`, data);
   return res.data;
 };
+// Murad: Event registration API handler
