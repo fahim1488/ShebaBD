@@ -13,7 +13,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from app.database import get_db
 from app.models import (
     Donation,
-    PaymentMethod,
     Transaction,
     User,
     DonationStatus,
@@ -51,33 +50,31 @@ async def create_donation(
     current_user: User = Depends(get_current_user),
     db: AsyncSession = Depends(get_db),
 ):
-    # Validate payment method
-    result = await db.execute(
-        select(PaymentMethod).where(
-            and_(
-                PaymentMethod.provider == donation_data.payment_provider,
-                PaymentMethod.is_active == True,
-            )
-        )
-    )
-    payment_method = result.scalar_one_or_none()
-
-    if not payment_method:
+    # Validate payment provider is a known enum value
+    valid_providers = {p.value for p in PaymentProvider}
+    if str(donation_data.payment_provider) not in valid_providers and donation_data.payment_provider not in valid_providers:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Payment method {donation_data.payment_provider} is not available",
+            detail=f"Invalid payment provider. Must be one of: {', '.join(valid_providers)}",
         )
 
-    if donation_data.amount < payment_method.min_amount:
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Minimum donation amount is ৳{payment_method.min_amount}",
-        )
+    # Hard-coded limits per provider (no DB lookup required)
+    PROVIDER_LIMITS = {
+        PaymentProvider.BKASH: (10, 25000),
+        PaymentProvider.NAGAD: (10, 25000),
+        PaymentProvider.BANK:  (50, 100000),
+    }
+    min_amt, max_amt = PROVIDER_LIMITS.get(donation_data.payment_provider, (10, 100000))
 
-    if donation_data.amount > payment_method.max_amount:
+    if donation_data.amount < min_amt:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Maximum donation amount is ৳{payment_method.max_amount}",
+            detail=f"Minimum donation amount for this payment method is ৳{min_amt}",
+        )
+    if donation_data.amount > max_amt:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail=f"Maximum donation amount for this payment method is ৳{max_amt}",
         )
 
     receipt_number = f"DN{datetime.now().strftime('%Y%m%d')}{str(uuid.uuid4())[:8].upper()}"

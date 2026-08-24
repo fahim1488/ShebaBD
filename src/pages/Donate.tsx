@@ -15,71 +15,89 @@ import {
   AlertCircle,
 } from 'lucide-react';
 
-/* ── Payment provider logos — local image assets ─────────────────────────── */
+/* ── Payment provider logos ─────────────────────────────────────────── */
 
+// Official bKash brand colors: #E2136E (magenta pink)
 const BkashLogo = () => (
-  <div className="flex items-center gap-2.5">
-    <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#E2136E] via-[#D12053] to-[#990033] shadow-md shadow-pink-500/25 ring-1 ring-pink-400/40">
-      <svg viewBox="0 0 24 24" className="h-6 w-6 fill-white drop-shadow">
-        <path d="M2.5 12L12 2.5L21.5 12L12 21.5L2.5 12Z" fill="none" stroke="white" strokeWidth="1.5" opacity="0.3" />
-        <path d="M12 3.5L4 12L12 17.5L20 12L12 3.5Z" fill="white" />
-        <path d="M12 6.5L7 12L12 15L17 12L12 6.5Z" fill="#E2136E" />
+  <div className="flex items-center gap-3">
+    {/* bKash official logo — pink circle with stylized "b" mark */}
+    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#E2136E] shadow-lg shadow-[#E2136E]/30">
+      <svg viewBox="0 0 40 40" className="h-7 w-7" fill="none">
+        {/* Stylized bKash "b" letterform */}
+        <path d="M10 8h6v24h-6V8z" fill="white"/>
+        <path d="M16 20c0-4.4 3.6-8 8-8s8 3.6 8 8-3.6 8-8 8-8-3.6-8-8z" fill="white" opacity="0.9"/>
+        <path d="M16 20c0-4.4 3.6-8 8-8s8 3.6 8 8-3.6 8-8 8-8-3.6-8-8z" fill="#E2136E"/>
+        <circle cx="24" cy="20" r="4" fill="white"/>
       </svg>
     </div>
-    <div className="flex flex-col">
-      <div className="flex items-center gap-1.5">
-        <span className="font-display text-base font-black tracking-tight text-ds-foreground">
-          bKash
-        </span>
-        <span className="rounded bg-pink-500/10 px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase text-pink-500 border border-pink-500/20">
-          Fast Pay
+    <div>
+      <div className="flex items-center gap-2">
+        <span className="text-base font-extrabold tracking-tight text-white">bKash</span>
+        <span className="rounded-md bg-[#E2136E]/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-[#f48db4] border border-[#E2136E]/30">
+          Mobile MFS
         </span>
       </div>
-      <span className="text-[10px] font-medium text-ds-muted">bKash Mobile Wallet</span>
+      <span className="text-[11px] text-slate-400">Bangladesh's #1 Mobile Wallet</span>
     </div>
   </div>
 );
 
+// Official Nagad brand colors: #F05A28 (orange-red)
 const NagadLogo = () => (
-  <div className="flex items-center gap-2.5">
-    <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#F73E1E] via-[#E62E05] to-[#B31D00] shadow-md shadow-orange-500/25 ring-1 ring-orange-400/40">
-      <svg viewBox="0 0 24 24" className="h-6 w-6 text-white" fill="currentColor">
-        <path d="M12 2C12 2 14.5 5.5 14.5 8C14.5 9.5 13.5 10.5 12 10.5C10.5 10.5 9.5 9.5 9.5 8C9.5 5.5 12 2 12 2Z" fill="white" opacity="0.9"/>
-        <path d="M12 7C14.5 10.5 18 12.5 18 16C18 19.31 15.31 22 12 22C8.69 22 6 19.31 6 16C6 12.5 9.5 10.5 12 7Z" fill="white"/>
-        <circle cx="12" cy="16" r="3" fill="#E62E05"/>
+  <div className="flex items-center gap-3">
+    {/* Nagad official logo — orange flame/drop mark */}
+    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#F05A28] shadow-lg shadow-[#F05A28]/30">
+      <svg viewBox="0 0 40 40" className="h-7 w-7" fill="none">
+        {/* Nagad flame/teardrop symbol */}
+        <path
+          d="M20 6C20 6 26 14 26 20C26 23.3 23.3 26 20 26C16.7 26 14 23.3 14 20C14 14 20 6 20 6Z"
+          fill="white"
+        />
+        <path
+          d="M20 16C20 16 23 19.5 23 22C23 23.7 21.7 25 20 25C18.3 25 17 23.7 17 22C17 19.5 20 16 20 16Z"
+          fill="#F05A28"
+        />
+        <path
+          d="M15 25C17 28 19 30 20 34C21 30 23 28 25 25"
+          stroke="white" strokeWidth="1.5" strokeLinecap="round" fill="none"
+        />
       </svg>
     </div>
-    <div className="flex flex-col">
-      <div className="flex items-center gap-1.5">
-        <span className="font-display text-base font-black tracking-tight text-ds-foreground">
-          Nagad
-        </span>
-        <span className="rounded bg-orange-500/10 px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase text-orange-500 border border-orange-500/20">
-          নগদ
+    <div>
+      <div className="flex items-center gap-2">
+        <span className="text-base font-extrabold tracking-tight text-white">নগদ</span>
+        <span className="rounded-md bg-[#F05A28]/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-[#fb9270] border border-[#F05A28]/30">
+          Instant Pay
         </span>
       </div>
-      <span className="text-[10px] font-medium text-ds-muted">Instant Digital Pay</span>
+      <span className="text-[11px] text-slate-400">Bangladesh Post Office MFS</span>
     </div>
   </div>
 );
 
+// Bank Transfer — professional blue
 const BankLogo = () => (
-  <div className="flex items-center gap-2.5">
-    <div className="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-xl bg-gradient-to-br from-[#1E3A8A] via-[#2563EB] to-[#1D4ED8] shadow-md shadow-blue-500/25 ring-1 ring-blue-400/40">
-      <svg viewBox="0 0 24 24" className="h-6 w-6 text-white" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-        <path d="M3 21h18M3 10h18M5 10v11M9 10v11M15 10v11M19 10v11M12 3L2 8h20l-10-5z" />
+  <div className="flex items-center gap-3">
+    <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-2xl bg-[#1D4ED8] shadow-lg shadow-[#1D4ED8]/30">
+      <svg viewBox="0 0 40 40" className="h-7 w-7" fill="none">
+        {/* Classic bank/building icon */}
+        <path d="M20 6L6 14h28L20 6z" fill="white"/>
+        <rect x="8" y="15" width="3" height="14" rx="1" fill="white"/>
+        <rect x="13.5" y="15" width="3" height="14" rx="1" fill="white"/>
+        <rect x="19" y="15" width="3" height="14" rx="1" fill="white" opacity="0.7"/>
+        <rect x="24.5" y="15" width="3" height="14" rx="1" fill="white"/>
+        <rect x="30" y="15" width="3" height="14" rx="1" fill="white"/>
+        <rect x="6" y="30" width="28" height="3" rx="1.5" fill="white"/>
       </svg>
     </div>
-    <div className="flex flex-col">
-      <div className="flex items-center gap-1.5">
-        <span className="font-display text-base font-black tracking-tight text-ds-foreground">
-          Bank Pay
-        </span>
-        <span className="rounded bg-blue-500/10 px-1.5 py-0.5 text-[9px] font-bold tracking-wider uppercase text-blue-500 border border-blue-500/20">
-          EFT / Online
+    <div>
+      <div className="flex items-center gap-2">
+        <span className="text-base font-extrabold tracking-tight text-white">Bank Transfer</span>
+        <span className="rounded-md bg-[#1D4ED8]/20 px-1.5 py-0.5 text-[9px] font-bold uppercase tracking-widest text-[#93c5fd] border border-[#1D4ED8]/30">
+          EFT / NPSB
         </span>
       </div>
-      <span className="text-[10px] font-medium text-ds-muted">Direct Bank Transfer</span>
+      <span className="text-[11px] text-slate-400">Direct bank account transfer</span>
     </div>
   </div>
 );
@@ -163,33 +181,23 @@ const CAUSES = [
 const PAYMENT_PROVIDERS = [
   {
     provider: PaymentProvider.BKASH,
-    name: 'bKash',
     Logo: BkashLogo,
-    selectedBorder: 'ring-pink-500',
-    selectedBg: 'bg-pink-950/30 border-pink-500/60',
-    defaultBg: 'border-ds-muted/20 hover:border-pink-400/50 hover:bg-pink-950/10',
-    description: 'Pay with your bKash mobile wallet',
-    accentColor: 'text-pink-400',
+    // selected: deep pink tint + bright pink border
+    selectedBg: 'border-[#E2136E] bg-[#E2136E]/10',
+    // unselected: subtle dark border, pink on hover
+    defaultBg: 'border-white/10 hover:border-[#E2136E]/60 hover:bg-[#E2136E]/5',
   },
   {
     provider: PaymentProvider.NAGAD,
-    name: 'Nagad',
     Logo: NagadLogo,
-    selectedBorder: 'ring-orange-500',
-    selectedBg: 'bg-orange-950/30 border-orange-500/60',
-    defaultBg: 'border-ds-muted/20 hover:border-orange-400/50 hover:bg-orange-950/10',
-    description: 'Pay with your Nagad account',
-    accentColor: 'text-orange-400',
+    selectedBg: 'border-[#F05A28] bg-[#F05A28]/10',
+    defaultBg: 'border-white/10 hover:border-[#F05A28]/60 hover:bg-[#F05A28]/5',
   },
   {
     provider: PaymentProvider.BANK,
-    name: 'Bank Transfer',
     Logo: BankLogo,
-    selectedBorder: 'ring-blue-500',
-    selectedBg: 'bg-blue-950/30 border-blue-500/60',
-    defaultBg: 'border-ds-muted/20 hover:border-blue-400/50 hover:bg-blue-950/10',
-    description: 'Direct bank account transfer',
-    accentColor: 'text-blue-400',
+    selectedBg: 'border-[#1D4ED8] bg-[#1D4ED8]/10',
+    defaultBg: 'border-white/10 hover:border-[#1D4ED8]/60 hover:bg-[#1D4ED8]/5',
   },
 ];
 
@@ -558,34 +566,34 @@ export default function Donate() {
                   <label className="block text-sm font-medium text-ds-foreground mb-2">
                     Payment Method <span className="text-ds-danger">*</span>
                   </label>
-                  <div className="grid grid-cols-1 gap-3 sm:grid-cols-3">
+                  <div className="grid grid-cols-1 gap-3">
                     {PAYMENT_PROVIDERS.map((provider) => {
                       const isSelected = form.payment_provider === provider.provider;
+                      const isDisabled = isSubmitting;
 
                       return (
                         <button
                           key={provider.provider}
                           type="button"
-                          onClick={() => handlePaymentMethodSelect(provider.provider)}
-                          className={`relative rounded-ds-lg border p-4 text-left transition-all duration-200 ${
-                            isSelected
-                              ? `${provider.selectedBg} ring-2 ${provider.selectedBorder}`
-                              : `bg-ds-background ${provider.defaultBg}`
-                          }`}
+                          disabled={isDisabled}
+                          onClick={() => !isDisabled && handlePaymentMethodSelect(provider.provider)}
+                          className={`relative w-full rounded-xl border-2 px-5 py-4 text-left transition-all duration-150
+                            ${isSelected ? provider.selectedBg : `bg-[#0B2E22] ${provider.defaultBg}`}
+                            ${isDisabled ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
+                          `}
                         >
-                          {/* Logo */}
-                          <div className="mb-3">
-                            <provider.Logo />
-                          </div>
-                          <p className={`text-xs ${isSelected ? provider.accentColor : 'text-ds-muted'}`}>
-                            {provider.description}
-                          </p>
-                          {/* Selected indicator dot */}
+                          <provider.Logo />
+
+                          {/* Tick indicator when selected */}
                           {isSelected && (
-                            <div className={`absolute top-2 right-2 h-2.5 w-2.5 rounded-full ${
-                              provider.provider === PaymentProvider.BKASH ? 'bg-pink-500' :
-                              provider.provider === PaymentProvider.NAGAD ? 'bg-orange-500' : 'bg-blue-500'
-                            }`} />
+                            <div className={`absolute right-4 top-1/2 -translate-y-1/2 flex h-6 w-6 items-center justify-center rounded-full ${
+                              provider.provider === PaymentProvider.BKASH ? 'bg-[#E2136E]' :
+                              provider.provider === PaymentProvider.NAGAD ? 'bg-[#F05A28]' : 'bg-[#1D4ED8]'
+                            }`}>
+                              <svg viewBox="0 0 12 12" className="h-3.5 w-3.5" fill="none">
+                                <path d="M2 6l3 3 5-5" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                              </svg>
+                            </div>
                           )}
                         </button>
                       );
