@@ -1,11 +1,12 @@
-import { useState, useMemo, useEffect, useRef } from 'react';
+import { useState, useMemo, useEffect, useRef, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { ROUTES } from '@/constants/routes';
+import { Loader2, AlertCircle, RefreshCw } from 'lucide-react';
+import { getOrganizations, getOrgCount, type Organization } from '@/services/organizationsApi';
 
 // ─── Design tokens (matches reference exactly) ─────────────────────────────
 const INK     = '#0B2E22';
 const INK2    = '#0F3A2B';
-const INK3    = '#123F30';
 const PAPER   = '#F7F1E1';
 const DISC    = '#D6472C';
 const DISC_DIM= '#B93B23';
@@ -14,9 +15,7 @@ const SKY     = '#3E7A8C';
 const LEAF    = '#4C8C6B';
 const CLAY    = '#A9673A';
 const MUTED_L = 'rgba(247,241,225,0.62)';
-const MUTED_D = 'rgba(22,36,29,0.6)';
 const LINE_L  = 'rgba(247,241,225,0.16)';
-const LINE_D  = 'rgba(22,36,29,0.13)';
 
 // ─── Category config ───────────────────────────────────────────────────────
 const CATEGORIES = [
@@ -31,19 +30,6 @@ const CATEGORIES = [
 
 const DISTRICTS = [
   'All Districts','Dhaka','Chittagong','Sylhet','Rajshahi','Khulna','Barisal','Mymensingh','Rangpur',
-];
-
-// ─── Org data ──────────────────────────────────────────────────────────────
-const ORGS = [
-  { id:1, name:'BRAC Bangladesh',          initial:'B', category:'education',   catColor: MARIGOLD,  district:'Dhaka',      rating:4.9, reviews:1240, volunteers:3200, verified:true,  desc:'One of the largest development organisations in the world, focusing on poverty alleviation and social empowerment.',           phone:'+880 2-9881265',  website:'brac.net'            },
-  { id:2, name:'Grameen Bank',             initial:'G', category:'poverty',     catColor: CLAY,      district:'Dhaka',      rating:4.8, reviews:980,  volunteers:1500, verified:true,  desc:'Microfinance pioneer providing small loans to the rural poor, enabling long-term financial independence.',                     phone:'+880 2-9005257',  website:'grameen.com'         },
-  { id:3, name:'Dhaka Ahsania Mission',    initial:'D', category:'education',   catColor: MARIGOLD,  district:'Dhaka',      rating:4.7, reviews:756,  volunteers:900,  verified:true,  desc:'Promotes education, health, and social development through grassroots programs across Bangladesh.',                           phone:'+880 2-8116149',  website:'ahsaniamission.org'  },
-  { id:4, name:'CRP Bangladesh',           initial:'C', category:'healthcare',  catColor: SKY,       district:'Dhaka',      rating:4.9, reviews:634,  volunteers:450,  verified:true,  desc:'Centre for the Rehabilitation of the Paralysed — providing world-class rehabilitation services.',                             phone:'+880 2-7791814',  website:'crp-bangladesh.org'  },
-  { id:5, name:'Bangladesh Red Crescent',  initial:'B', category:'disaster',    catColor: DISC_DIM,  district:'Dhaka',      rating:4.8, reviews:1100, volunteers:5000, verified:true,  desc:'Provides emergency relief, blood services, and disaster preparedness across all 64 districts.',                               phone:'+880 2-9330188',  website:'bdrcs.org'           },
-  { id:6, name:'Chittagong Green Force',   initial:'C', category:'environment', catColor: LEAF,      district:'Chittagong', rating:4.5, reviews:320,  volunteers:780,  verified:true,  desc:'Environmental organisation focused on coastal protection, tree plantation, and climate awareness.',                            phone:'+880 31-614732',  website:'greenforce.bd'       },
-  { id:7, name:'Sylhet Blood Bank',        initial:'S', category:'blood',       catColor: DISC,      district:'Sylhet',     rating:4.7, reviews:892,  volunteers:1200, verified:true,  desc:'Largest voluntary blood donation network in the Sylhet division — 24/7 emergency blood supply.',                              phone:'+880 821-713456', website:'sylhetblood.org'     },
-  { id:8, name:'Rajshahi Education Trust', initial:'R', category:'education',   catColor: MARIGOLD,  district:'Rajshahi',   rating:4.6, reviews:445,  volunteers:320,  verified:true,  desc:'Providing free primary education and skill development training to underprivileged children.',                                 phone:'+880 721-775432', website:'ret.org.bd'          },
-  { id:9, name:'Khulna Disaster Response', initial:'K', category:'disaster',    catColor: DISC_DIM,  district:'Khulna',     rating:4.4, reviews:267,  volunteers:650,  verified:true,  desc:'Specialised in cyclone preparedness, flood relief, and Sundarbans conservation in the south-west.',                          phone:'+880 41-723589',  website:'kdr.bd'              },
 ];
 
 // ─── Reveal on scroll ──────────────────────────────────────────────────────
@@ -81,17 +67,37 @@ export default function Organizations() {
   const [search, setSearch]           = useState('');
   const [activeCategory, setCategory] = useState('all');
   const [activeDistrict, setDistrict] = useState('All Districts');
+  const [orgs, setOrgs]               = useState<Organization[]>([]);
+  const [totalCount, setTotalCount]   = useState<number>(0);
+  const [loading, setLoading]         = useState(true);
+  const [error, setError]             = useState<string | null>(null);
 
-  const filtered = useMemo(() =>
-    ORGS.filter((o) => {
-      const matchSearch = o.name.toLowerCase().includes(search.toLowerCase()) ||
-                          o.desc.toLowerCase().includes(search.toLowerCase());
-      const matchCat    = activeCategory === 'all' || o.category === activeCategory;
-      const matchDist   = activeDistrict === 'All Districts' || o.district === activeDistrict;
-      return matchSearch && matchCat && matchDist;
-    }),
-    [search, activeCategory, activeDistrict],
-  );
+  const loadOrgs = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      const [data, count] = await Promise.all([
+        getOrganizations({
+          category: activeCategory === 'all' ? undefined : activeCategory,
+          district: activeDistrict === 'All Districts' ? undefined : activeDistrict,
+          search: search.trim() || undefined,
+          limit: 100,
+        }),
+        getOrgCount().catch(() => 0),
+      ]);
+      setOrgs(data);
+      setTotalCount(count);
+    } catch {
+      setError('Could not load organizations. Please try again.');
+    } finally {
+      setLoading(false);
+    }
+  }, [activeCategory, activeDistrict, search]);
+
+  useEffect(() => {
+    const t = setTimeout(loadOrgs, search ? 400 : 0);
+    return () => clearTimeout(t);
+  }, [loadOrgs, search]);
 
   return (
     <div style={{ background: INK, color: PAPER, minHeight: '100vh' }}>
@@ -133,7 +139,7 @@ export default function Organizations() {
 
         <Reveal>
           <p style={{ color: MUTED_L, fontSize: 16, maxWidth: 560 }}>
-            Browse {ORGS.length}+ verified NGOs, charities, and social groups across 64 districts of Bangladesh.
+            Browse {totalCount > 0 ? `${totalCount}+` : '2,400+'} verified NGOs, charities, and social groups across 64 districts of Bangladesh.
           </p>
         </Reveal>
 
@@ -229,20 +235,36 @@ export default function Organizations() {
             className="font-mono-ibm text-[13px] mb-[26px]"
             style={{ color: MUTED_L }}
           >
-            Showing <strong style={{ color: PAPER }}>{filtered.length}</strong> of{' '}
-            <strong style={{ color: PAPER }}>2,400+</strong> organizations
+            Showing <strong style={{ color: PAPER }}>{orgs.length}</strong> of{' '}
+            <strong style={{ color: PAPER }}>{totalCount > 0 ? `${totalCount}+` : '2,400+'}</strong> organizations
           </p>
         </Reveal>
       </section>
 
-      {/* ════════════════════════════════════════════════════════════════════
-          ORG GRID
-      ════════════════════════════════════════════════════════════════════ */}
-      <div
-        style={{ maxWidth: 1240, margin: '0 auto', padding: '0 32px' }}
-      >
-        {filtered.length === 0 ? (
-          <Reveal>
+      <div style={{ maxWidth: 1240, margin: '0 auto', padding: '0 32px' }}>
+        {loading && (
+          <div className="flex justify-center py-24">
+            <Loader2 size={36} style={{ color: SKY, animation: 'spin 1s linear infinite' }} />
+          </div>
+        )}
+
+        {error && !loading && (
+          <div className="flex items-center gap-3 rounded p-4 my-8"
+            style={{ background: `${DISC}12`, border: `1px solid ${DISC}44` }}>
+            <AlertCircle size={16} style={{ color: DISC, flexShrink: 0 }} />
+            <p className="text-sm flex-1" style={{ color: PAPER }}>{error}</p>
+            <button onClick={loadOrgs} className="flex items-center gap-1 text-xs px-3 py-1 rounded"
+              style={{ border: `1px solid ${LINE_L}`, color: MUTED_L }}>
+              <RefreshCw size={11} /> Retry
+            </button>
+          </div>
+        )}
+        {/* ════════════════════════════════════════════════════════════════════
+            ORG GRID
+        ════════════════════════════════════════════════════════════════════ */}
+        {!loading && !error && (
+          orgs.length === 0 ? (
+            <Reveal>
             <div
               className="flex flex-col items-center justify-center py-24 font-fraunces"
               style={{ color: MUTED_L, fontSize: 20 }}
@@ -252,7 +274,7 @@ export default function Organizations() {
               <p style={{ fontSize: 14, marginTop: 8 }}>Try adjusting your search or filters.</p>
             </div>
           </Reveal>
-        ) : (
+          ) : (
           <Reveal>
             <div
               style={{
@@ -263,11 +285,12 @@ export default function Organizations() {
               }}
               className="org-grid-responsive"
             >
-              {filtered.map((org) => (
+              {orgs.map((org) => (
                 <OrgCard key={org.id} org={org} />
               ))}
             </div>
           </Reveal>
+          )
         )}
 
         {/* ════════════════════════════════════════════════════════════════
@@ -341,8 +364,9 @@ export default function Organizations() {
 }
 
 // ─── OrgCard ───────────────────────────────────────────────────────────────
-function OrgCard({ org }: { org: typeof ORGS[number] }) {
+function OrgCard({ org }: { org: Organization }) {
   const catLabel = org.category.charAt(0).toUpperCase() + org.category.slice(1).replace('_', ' ');
+  const catColor = CATEGORIES.find(c => c.id === org.category)?.color ?? DISC;
 
   return (
     <div
@@ -373,7 +397,7 @@ function OrgCard({ org }: { org: typeof ORGS[number] }) {
         <div
           style={{
             width: 44, height: 44, borderRadius: '50%', flexShrink: 0,
-            background: org.catColor, color: '#F7F1E1',
+            background: catColor, color: '#F7F1E1',
             display: 'flex', alignItems: 'center', justifyContent: 'center',
             fontFamily: "'IBM Plex Mono', monospace", fontWeight: 600, fontSize: 15,
           }}
@@ -382,91 +406,49 @@ function OrgCard({ org }: { org: typeof ORGS[number] }) {
         </div>
         <div>
           <div style={{ display: 'flex', alignItems: 'center', gap: 7, flexWrap: 'wrap' }}>
-            <h3
-              className="font-fraunces"
-              style={{ fontSize: 18, fontWeight: 600, color: '#16241D' }}
-            >
+            <h3 className="font-fraunces" style={{ fontSize: 18, fontWeight: 600, color: '#16241D' }}>
               {org.name}
             </h3>
-            {org.verified && (
-              <span style={{ color: '#4C8C6B', fontSize: 13 }}>✓</span>
-            )}
+            {org.is_verified && <span style={{ color: '#4C8C6B', fontSize: 13 }}>✓</span>}
           </div>
-          <div
-            style={{
-              display: 'flex', alignItems: 'center', gap: 8,
-              marginTop: 4, fontSize: 12.5, color: 'rgba(22,36,29,0.6)',
-            }}
-          >
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginTop: 4, fontSize: 12.5, color: 'rgba(22,36,29,0.6)' }}>
             <span>📍 {org.district}</span>
-            <span
-              className="font-mono-ibm"
-              style={{ fontSize: 11, letterSpacing: '0.03em', color: org.catColor, textTransform: 'uppercase' }}
-            >
+            <span className="font-mono-ibm" style={{ fontSize: 11, letterSpacing: '0.03em', color: catColor, textTransform: 'uppercase' }}>
               {catLabel}
             </span>
           </div>
         </div>
       </div>
 
-      {/* Description */}
-      <p
-        style={{
-          fontSize: 14, lineHeight: 1.6,
-          color: 'rgba(22,36,29,0.6)', flexGrow: 1,
-        }}
-      >
-        {org.desc}
+      <p style={{ fontSize: 14, lineHeight: 1.6, color: 'rgba(22,36,29,0.6)', flexGrow: 1 }}>
+        {org.description}
       </p>
 
-      {/* Stats divider */}
-      <div
-        style={{
-          borderTop: `1px solid rgba(22,36,29,0.13)`,
-          paddingTop: 14,
-          display: 'flex', justifyContent: 'space-between',
-          fontSize: 13, color: 'rgba(22,36,29,0.6)',
-        }}
-      >
+      <div style={{ borderTop: '1px solid rgba(22,36,29,0.13)', paddingTop: 14, display: 'flex', justifyContent: 'space-between', fontSize: 13, color: 'rgba(22,36,29,0.6)' }}>
         <span style={{ fontWeight: 600, color: '#16241D' }}>
           <span style={{ color: '#E7A93B', marginRight: 5 }}>★</span>
-          {org.rating} ({org.reviews.toLocaleString()})
+          {Number(org.rating).toFixed(1)} ({org.review_count.toLocaleString()})
         </span>
-        <span>👥 {org.volunteers.toLocaleString()} volunteers</span>
+        <span>👥 {org.volunteer_count.toLocaleString()} volunteers</span>
       </div>
 
-      {/* Actions */}
       <div style={{ display: 'flex', gap: 10 }}>
-        <a
-          href={`tel:${org.phone}`}
-          style={{
-            flex: 1, display: 'inline-flex', justifyContent: 'center',
-            alignItems: 'center', padding: '10px 14px', fontSize: 13, fontWeight: 600,
-            borderRadius: 2, border: `1px solid rgba(22,36,29,0.13)`,
-            color: '#16241D', textDecoration: 'none',
-            transition: 'all 0.18s ease',
-          }}
-          onMouseEnter={e => (e.currentTarget.style.borderColor = '#16241D')}
-          onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(22,36,29,0.13)')}
-        >
-          Call
-        </a>
-        <a
-          href={`https://${org.website}`}
-          target="_blank"
-          rel="noopener noreferrer"
-          style={{
-            flex: 1, display: 'inline-flex', justifyContent: 'center',
-            alignItems: 'center', padding: '10px 14px', fontSize: 13, fontWeight: 600,
-            borderRadius: 2, border: 'none',
-            background: '#0B2E22', color: '#F7F1E1', textDecoration: 'none',
-            transition: 'background 0.18s ease',
-          }}
-          onMouseEnter={e => (e.currentTarget.style.background = '#123F30')}
-          onMouseLeave={e => (e.currentTarget.style.background = '#0B2E22')}
-        >
-          Website
-        </a>
+        {org.phone && (
+          <a href={`tel:${org.phone}`}
+            style={{ flex: 1, display: 'inline-flex', justifyContent: 'center', alignItems: 'center', padding: '10px 14px', fontSize: 13, fontWeight: 600, borderRadius: 2, border: '1px solid rgba(22,36,29,0.13)', color: '#16241D', textDecoration: 'none', transition: 'all 0.18s ease' }}
+            onMouseEnter={e => (e.currentTarget.style.borderColor = '#16241D')}
+            onMouseLeave={e => (e.currentTarget.style.borderColor = 'rgba(22,36,29,0.13)')}>
+            Call
+          </a>
+        )}
+        {org.website && (
+          <a href={`https://${org.website}`} target="_blank" rel="noopener noreferrer"
+            style={{ flex: 1, display: 'inline-flex', justifyContent: 'center', alignItems: 'center', padding: '10px 14px', fontSize: 13, fontWeight: 600, borderRadius: 2, border: 'none', background: '#0B2E22', color: '#F7F1E1', textDecoration: 'none', transition: 'background 0.18s ease' }}
+            onMouseEnter={e => (e.currentTarget.style.background = '#123F30')}
+            onMouseLeave={e => (e.currentTarget.style.background = '#0B2E22')}>
+            Website
+          </a>
+        )}
       </div>
     </div>
   );

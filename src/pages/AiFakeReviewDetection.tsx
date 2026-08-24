@@ -2,7 +2,6 @@ import { useState, useEffect, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Link } from 'react-router-dom';
 import {
-  MessageSquareX, MessageSquareCheck,
   Brain, Search, CheckCircle2, XCircle,
   Eye, Copy, Bot, ChevronRight,
   Fingerprint, Filter, ShieldCheck,
@@ -28,11 +27,11 @@ const SAFE     = '#22C55E';
 type Verdict = 'SPAM' | 'DUPLICATE' | 'AI_GENERATED' | 'MANIPULATED' | 'AUTHENTIC';
 
 const VERDICT_META: Record<Verdict, { color: string; bg: string; icon: React.ReactNode; label: string }> = {
-  SPAM:         { color: DANGER,   bg: 'rgba(239,68,68,0.11)',  icon: <MessageSquareX size={13}/>,    label: 'Spam'         },
+  SPAM:         { color: DANGER,   bg: 'rgba(239,68,68,0.11)',  icon: <XCircle size={13}/>,           label: 'Spam'         },
   DUPLICATE:    { color: DISC,     bg: 'rgba(214,71,44,0.11)',  icon: <Copy size={13}/>,               label: 'Duplicate'    },
   AI_GENERATED: { color: WARN,     bg: 'rgba(245,158,11,0.11)', icon: <Bot size={13}/>,                label: 'AI-Generated' },
   MANIPULATED:  { color: MARIGOLD, bg: 'rgba(231,169,59,0.10)', icon: <Flag size={13}/>,               label: 'Manipulated'  },
-  AUTHENTIC:    { color: SAFE,     bg: 'rgba(34,197,94,0.11)',  icon: <MessageSquareCheck size={13}/>, label: 'Authentic'    },
+  AUTHENTIC:    { color: SAFE,     bg: 'rgba(34,197,94,0.11)',  icon: <CheckCircle2 size={13}/>,       label: 'Authentic'    },
 };
 
 const FLAGGED_REVIEWS = [

@@ -173,7 +173,6 @@ export function WorldMap({
                   }}
                   style={{
                     offsetPath: `path('${pathD}')`,
-                    // @ts-expect-error — offsetDistance is a valid CSS motion-path property
                     offsetDistance: '50%',
                   }}
                 />
