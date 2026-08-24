@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 280 100">
+  <!-- Nagad emblem: two thick concentric arcs open at bottom-left, white centre, runner, flag -->
+
+  <!-- Outer arc: orange, ~300deg sweep, opens toward bottom-left -->
+  <path d="M50,50 m0,-38 a38,38 0 1,1 -26.9,64.9"
+    fill="none" stroke="#F7941D" stroke-width="12" stroke-linecap="round"/>
+
+  <!-- Inner arc: red, same sweep, smaller radius -->
+  <path d="M50,50 m0,-24 a24,24 0 1,1 -17,41"
+    fill="none" stroke="#ED1C24" stroke-width="8" stroke-linecap="round"/>
+
+  <!-- White centre to create donut hole -->
+  <circle cx="50" cy="50" r="13" fill="white"/>
+
+  <!-- Runner silhouette (red on white) -->
+  <!-- Head -->
+  <circle cx="50" cy="40" r="3.5" fill="#ED1C24"/>
+  <!-- Torso -->
+  <line x1="50" y1="43.5" x2="50" y2="54" stroke="#ED1C24" stroke-width="2.5" stroke-linecap="round"/>
+  <!-- Left arm back -->
+  <line x1="50" y1="46" x2="44" y2="50" stroke="#ED1C24" stroke-width="2" stroke-linecap="round"/>
+  <!-- Right arm forward / holding lance -->
+  <line x1="50" y1="46" x2="57" y2="43" stroke="#ED1C24" stroke-width="2" stroke-linecap="round"/>
+  <!-- Left leg forward -->
+  <line x1="50" y1="54" x2="45" y2="61" stroke="#ED1C24" stroke-width="2" stroke-linecap="round"/>
+  <!-- Right leg back -->
+  <line x1="50" y1="54" x2="55" y2="60" stroke="#ED1C24" stroke-width="2" stroke-linecap="round"/>
+  <!-- Lance / flag pole -->
+  <line x1="57" y1="43" x2="63" y2="33" stroke="#ED1C24" stroke-width="1.8" stroke-linecap="round"/>
+  <!-- Flag -->
+  <polygon points="63,33 72,37 63,41" fill="#F7941D"/>
+
+  <!-- নগদ Bengali wordmark -->
+  <text x="108" y="66"
+    font-family="'Noto Sans Bengali', 'SolaimanLipi', Arial Unicode MS, sans-serif"
+    font-weight="900"
+    font-size="46"
+    fill="#ED1C24"
+    letter-spacing="-1">নগদ</text>
+</svg>

@@ -1,0 +1,10 @@
+import sqlite3
+db = sqlite3.connect('shebabd.db')
+cursor = db.cursor()
+cursor.execute("SELECT * FROM payment_methods")
+rows = cursor.fetchall()
+print("payment_methods rows:", rows)
+cursor.execute("SELECT name FROM sqlite_master WHERE type='table'")
+tables = cursor.fetchall()
+print("Tables:", [t[0] for t in tables])
+db.close()

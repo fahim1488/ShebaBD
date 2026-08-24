@@ -1,3 +1,39 @@
+@import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,300;9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap');
+
+@import './tokens.css';
+@import './typography.css';
+@import './animations.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  html {
+    @apply antialiased;
+    scroll-behavior: smooth;
+  }
+
+  body {
+    font-family: 'Inter', sans-serif;
+    @apply ds-body bg-ds-background text-ds-foreground;
+    transition:
+      background-color var(--ds-transition-normal) var(--ds-easing-default),
+      color var(--ds-transition-normal) var(--ds-easing-default);
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection {
+    background: #D6472C;
+    color: #F7F1E1;
+  }
+}
+
+@layer utilities {
+  .font-fraunces {
+    font-family: 'Fraunces', serif;
+  }
+  .font-mono-ibm {
+    font-family: 'IBM Plex Mono', monospace;
+  }
+}

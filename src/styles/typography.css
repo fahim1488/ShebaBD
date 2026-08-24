@@ -1,0 +1,65 @@
+@layer components {
+  .ds-display {
+    font-family: var(--ds-font-family-display);
+    font-size: var(--ds-font-size-display);
+    font-weight: var(--ds-font-weight-display);
+    line-height: var(--ds-line-height-display);
+    letter-spacing: var(--ds-letter-spacing-display);
+  }
+
+  .ds-heading {
+    font-family: var(--ds-font-family-display);
+    font-size: var(--ds-font-size-heading);
+    font-weight: var(--ds-font-weight-heading);
+    line-height: var(--ds-line-height-heading);
+    letter-spacing: var(--ds-letter-spacing-heading);
+  }
+
+  .ds-title {
+    font-family: var(--ds-font-family-display);
+    font-size: var(--ds-font-size-title);
+    font-weight: var(--ds-font-weight-title);
+    line-height: var(--ds-line-height-title);
+    letter-spacing: var(--ds-letter-spacing-title);
+  }
+
+  .ds-subtitle {
+    font-family: var(--ds-font-family-sans);
+    font-size: var(--ds-font-size-subtitle);
+    font-weight: var(--ds-font-weight-subtitle);
+    line-height: var(--ds-line-height-subtitle);
+    letter-spacing: var(--ds-letter-spacing-subtitle);
+  }
+
+  .ds-body {
+    font-family: var(--ds-font-family-sans);
+    font-size: var(--ds-font-size-body);
+    font-weight: var(--ds-font-weight-body);
+    line-height: var(--ds-line-height-body);
+    letter-spacing: var(--ds-letter-spacing-body);
+  }
+
+  .ds-caption {
+    font-family: var(--ds-font-family-sans);
+    font-size: var(--ds-font-size-caption);
+    font-weight: var(--ds-font-weight-caption);
+    line-height: var(--ds-line-height-caption);
+    letter-spacing: var(--ds-letter-spacing-caption);
+  }
+
+  .ds-button-text {
+    font-family: var(--ds-font-family-sans);
+    font-size: var(--ds-font-size-button);
+    font-weight: var(--ds-font-weight-button);
+    line-height: var(--ds-line-height-button);
+    letter-spacing: var(--ds-letter-spacing-button);
+  }
+
+  .ds-label {
+    font-family: var(--ds-font-family-sans);
+    font-size: var(--ds-font-size-label);
+    font-weight: var(--ds-font-weight-label);
+    line-height: var(--ds-line-height-label);
+    letter-spacing: var(--ds-letter-spacing-label);
+  }
+}
