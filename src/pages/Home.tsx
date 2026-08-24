@@ -23,6 +23,9 @@ import {
   ShieldCheck,
   Pause,
   Play,
+  Eye,
+  Camera,
+  Layers,
 } from 'lucide-react';
 import { WorldMap } from '@/components/ui/map/WorldMap';
 import { ROUTES } from '@/constants/routes';
@@ -34,54 +37,54 @@ const PAPER    = '#F7F1E1';
 const DISC     = '#D6472C';
 const MARIGOLD = '#E7A93B';
 const SKY      = '#3E7A8C';
-const MUTED_L  = 'rgba(247,241,225,0.70)';
-const MUTED_D  = 'rgba(22,36,29,0.70)';
+const MUTED_L  = 'rgba(247,241,225,0.75)';
+const MUTED_D  = 'rgba(22,36,29,0.75)';
 
 // ─── Hero Slide Data ─────────────────────────────────────────────────────────
 const HERO_SLIDES = [
   {
     id: 1,
     image: '/hero-slide1.jpg',
-    tag: 'Disaster Relief & Response',
+    tag: 'Disaster Relief & Emergency Response',
     title: 'Emergency Flood Relief Across 64 Districts',
-    subtitle: 'Deploying immediate rescue units, food packs, and clean drinking water to flood-affected communities with live GPS tracking.',
+    subtitle: 'Deploying immediate rescue boats, dry food packs, and clean drinking water to flood-affected communities with live GPS tracking.',
     primaryCta: { label: 'Support Emergency Relief', href: ROUTES.DONATE },
     secondaryCta: { label: 'View Emergency Grid', href: ROUTES.EMERGENCY },
   },
   {
     id: 2,
     image: '/hero-slide2.jpg',
-    tag: 'Community Empowerment',
+    tag: 'Community Volunteering & Aid',
     title: 'Mobilizing 18,000+ Verified Youth Volunteers',
-    subtitle: 'Connecting passionate individuals with registered NGOs and charity initiatives for community development and social change.',
+    subtitle: 'Connecting passionate individuals with registered NGOs and charity initiatives for community feeding, relief packing, and social action.',
     primaryCta: { label: 'Join as Volunteer', href: ROUTES.VOLUNTEERS },
     secondaryCta: { label: 'Find Opportunities', href: ROUTES.ORGANIZATIONS },
   },
   {
     id: 3,
     image: '/hero-slide3.jpg',
-    tag: 'Healthcare & Life Saving',
+    tag: 'Medical Camps & Blood Drives',
     title: 'Instant AI-Powered Blood Donor Matching',
-    subtitle: 'Connecting critical patients with compatible nearby blood donors in minutes. Every drop counts, every second matters.',
+    subtitle: 'Connecting critical hospital patients with compatible nearby blood donors in minutes. Free medical checkups and emergency dispatch.',
     primaryCta: { label: 'Find Blood Donor', href: ROUTES.BLOOD_DONATION },
     secondaryCta: { label: 'Register as Donor', href: ROUTES.BLOOD_DONATION },
   },
   {
     id: 4,
     image: '/hero-slide4.jpg',
-    tag: 'Education & Child Welfare',
+    tag: 'Education & Child Empowerment',
     title: 'Empowering the Next Generation of Bangladesh',
-    subtitle: 'Supporting underprivileged children with educational kits, digital learning resources, and nutritional support programs.',
+    subtitle: 'Supporting underprivileged children with educational kits, digital learning classrooms, and nutrition programs across rural schools.',
     primaryCta: { label: 'Sponsor a Child', href: ROUTES.DONATE },
-    secondaryCta: { label: 'Partner Campaigns', href: ROUTES.EVENTS },
+    secondaryCta: { label: 'Explore Campaigns', href: ROUTES.EVENTS },
   },
   {
     id: 5,
     image: '/hero-slide5.jpg',
-    tag: 'Civic Innovation',
+    tag: 'Emergency Rescue & Healthcare',
     title: 'Transparent Civic Ecosystem Powered by AI',
-    subtitle: 'Real-time donation tracking, verified NGO trust scores, and automated disaster alerts across Bangladesh.',
-    primaryCta: { label: 'Explore Platform', href: ROUTES.ORGANIZATIONS },
+    subtitle: 'Real-time donation tracking, verified NGO trust ratings, and 24/7 automated emergency alerts across all 8 divisions.',
+    primaryCta: { label: 'Explore Directory', href: ROUTES.ORGANIZATIONS },
     secondaryCta: { label: 'AI Smart Search', href: ROUTES.AI_SMART_SEARCH },
   },
 ];
@@ -97,8 +100,8 @@ function Eyebrow({ label, onPaper = false }: { label: string; onPaper?: boolean 
       className="inline-flex items-center gap-2.5 px-3.5 py-1.5 rounded-full font-mono-ibm text-xs tracking-[0.12em] uppercase font-semibold border backdrop-blur-md shadow-sm"
       style={{
         color: onPaper ? INK : MARIGOLD,
-        background: onPaper ? 'rgba(11,46,34,0.06)' : 'rgba(231,169,59,0.12)',
-        borderColor: onPaper ? 'rgba(11,46,34,0.15)' : 'rgba(231,169,59,0.30)',
+        background: onPaper ? 'rgba(11,46,34,0.06)' : 'rgba(231,169,59,0.14)',
+        borderColor: onPaper ? 'rgba(11,46,34,0.15)' : 'rgba(231,169,59,0.35)',
       }}
     >
       <motion.span
@@ -292,136 +295,132 @@ export default function Home() {
     <div style={{ background: INK, color: PAPER, overflowX: 'hidden' }}>
 
       {/* ════════════════════════════════════════════════════════════════════
-          HERO PICTURE SLIDE BAR / CAROUSEL
+          HERO PICTURE SLIDE BAR / CAROUSEL — CRYSTAL CLEAR VISUALS
       ════════════════════════════════════════════════════════════════════ */}
       <section 
-        className="relative overflow-hidden min-h-[92vh] flex items-center pt-24 pb-16"
+        className="relative overflow-hidden min-h-[92vh] flex items-center pt-20 pb-16"
         onMouseEnter={() => setIsAutoPlay(false)}
         onMouseLeave={() => setIsAutoPlay(true)}
       >
-        {/* Background Image Carousel with Smooth Fade Transitions */}
+        {/* Full-bleed Crystal Clear Photography Background with smooth animation */}
         <AnimatePresence mode="wait">
           <motion.div
             key={slide.id}
-            initial={{ opacity: 0, scale: 1.04 }}
+            initial={{ opacity: 0, scale: 1.05 }}
             animate={{ opacity: 1, scale: 1 }}
-            exit={{ opacity: 0, scale: 0.98 }}
-            transition={{ duration: 0.85, ease: [0.16, 1, 0.3, 1] }}
+            exit={{ opacity: 0, scale: 0.96 }}
+            transition={{ duration: 0.9, ease: [0.16, 1, 0.3, 1] }}
             className="absolute inset-0 bg-cover bg-center bg-no-repeat"
             style={{
               backgroundImage: `url(${slide.image})`,
-              backgroundPosition: 'center 35%',
+              backgroundPosition: 'center 40%',
             }}
           />
         </AnimatePresence>
 
-        {/* Multi-layer Dark Gradient Overlays for Enhanced Text Contrast */}
-        <div className="absolute inset-0 bg-gradient-to-r from-[#061C14]/95 via-[#0B2E22]/85 to-[#061C14]/75" />
-        <div className="absolute inset-0 bg-gradient-to-t from-[#0B2E22] via-transparent to-[#0B2E22]/60" />
-        <div className="absolute top-1/4 left-10 w-96 h-96 bg-amber-500/10 rounded-full blur-[140px] pointer-events-none" />
-        <div className="absolute bottom-10 right-10 w-96 h-96 bg-emerald-500/10 rounded-full blur-[140px] pointer-events-none" />
+        {/* Crisp & clean bottom vignette: leaves 80%+ of the photo bright & unobstructed */}
+        <div className="absolute inset-0 bg-gradient-to-t from-[#0B2E22] via-black/35 to-black/20" />
+        <div className="absolute inset-0 bg-gradient-to-r from-black/60 via-transparent to-black/40" />
 
-        {/* Slide Content */}
+        {/* Slide Content Box */}
         <div className="relative z-10 mx-auto w-full px-6 md:px-8 max-w-[1280px]">
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center">
             
-            {/* Left Content Column */}
-            <div className="lg:col-span-8 flex flex-col items-start">
-              
-              {/* Badge */}
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={`badge-${slide.id}`}
-                  initial={{ opacity: 0, y: -12 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: 8 }}
-                  transition={{ duration: 0.4 }}
-                  className="inline-flex items-center gap-2.5 px-4 py-1.5 rounded-full bg-white/[0.12] border border-white/20 backdrop-blur-xl mb-5 text-xs font-mono-ibm font-medium text-amber-300 shadow-xl"
-                >
-                  <span className="relative flex h-2 w-2">
-                    <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
-                    <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
-                  </span>
-                  <span>{slide.tag}</span>
-                  <span className="text-white/30">•</span>
-                  <span className="text-emerald-300 font-semibold">ShebaBD Live Grid</span>
-                </motion.div>
-              </AnimatePresence>
-
-              {/* Title */}
-              <AnimatePresence mode="wait">
-                <motion.h1
-                  key={`title-${slide.id}`}
-                  initial={{ opacity: 0, y: 20 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -16 }}
-                  transition={{ duration: 0.55, delay: 0.05 }}
-                  className="font-fraunces mb-5 text-3.5xl sm:text-5xl lg:text-6xl leading-[1.1] tracking-tight font-bold text-white drop-shadow-2xl max-w-2xl"
-                >
-                  {slide.title}
-                </motion.h1>
-              </AnimatePresence>
-
-              {/* Subtitle */}
-              <AnimatePresence mode="wait">
-                <motion.p
-                  key={`subtitle-${slide.id}`}
-                  initial={{ opacity: 0, y: 16 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -12 }}
-                  transition={{ duration: 0.5, delay: 0.12 }}
-                  className="mb-8 text-base sm:text-lg leading-relaxed text-emerald-100/90 max-w-xl drop-shadow"
-                >
-                  {slide.subtitle}
-                </motion.p>
-              </AnimatePresence>
-
-              {/* Action Buttons */}
-              <AnimatePresence mode="wait">
-                <motion.div
-                  key={`actions-${slide.id}`}
-                  initial={{ opacity: 0, y: 14 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0 }}
-                  transition={{ duration: 0.45, delay: 0.18 }}
-                  className="flex flex-wrap items-center gap-4 mb-8"
-                >
-                  <Link
-                    to={slide.primaryCta.href}
-                    className="inline-flex items-center gap-2.5 px-7 py-3.5 rounded-xl font-semibold text-sm transition-all duration-300 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-emerald-950 shadow-xl hover:shadow-amber-400/30 hover:-translate-y-0.5"
+            {/* Left High-Legibility Glassmorphic Information Card */}
+            <div className="lg:col-span-7">
+              <div className="p-7 sm:p-9 rounded-3xl bg-[#061C14]/80 backdrop-blur-2xl border border-white/20 shadow-[0_20px_60px_rgba(0,0,0,0.6)]">
+                
+                {/* Badge */}
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={`badge-${slide.id}`}
+                    initial={{ opacity: 0, y: -8 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: 8 }}
+                    transition={{ duration: 0.3 }}
+                    className="inline-flex items-center gap-2 px-3.5 py-1 rounded-full bg-amber-400/20 border border-amber-400/40 text-amber-300 text-xs font-mono-ibm font-semibold mb-4"
                   >
-                    <span>{slide.primaryCta.label}</span>
-                    <ArrowRight className="w-4 h-4" />
-                  </Link>
+                    <span className="relative flex h-2 w-2">
+                      <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75" />
+                      <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-400" />
+                    </span>
+                    <span>{slide.tag}</span>
+                  </motion.div>
+                </AnimatePresence>
 
-                  <Link
-                    to={slide.secondaryCta.href}
-                    className="inline-flex items-center gap-2 px-6 py-3.5 rounded-xl font-semibold text-sm transition-all duration-300 bg-white/10 hover:bg-white/15 border border-white/20 text-white backdrop-blur-md hover:-translate-y-0.5"
+                {/* Title */}
+                <AnimatePresence mode="wait">
+                  <motion.h1
+                    key={`title-${slide.id}`}
+                    initial={{ opacity: 0, y: 16 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -12 }}
+                    transition={{ duration: 0.45, delay: 0.05 }}
+                    className="font-fraunces mb-4 text-3xl sm:text-4xl lg:text-5xl leading-[1.12] tracking-tight font-bold text-white drop-shadow"
                   >
-                    <span>{slide.secondaryCta.label}</span>
-                  </Link>
-                </motion.div>
-              </AnimatePresence>
+                    {slide.title}
+                  </motion.h1>
+                </AnimatePresence>
 
-              {/* AI Search Bar */}
-              <div className="w-full max-w-xl">
+                {/* Subtitle */}
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key={`subtitle-${slide.id}`}
+                    initial={{ opacity: 0, y: 12 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -8 }}
+                    transition={{ duration: 0.4, delay: 0.1 }}
+                    className="mb-6 text-sm sm:text-base leading-relaxed text-emerald-100/90"
+                  >
+                    {slide.subtitle}
+                  </motion.p>
+                </AnimatePresence>
+
+                {/* Action Buttons */}
+                <AnimatePresence mode="wait">
+                  <motion.div
+                    key={`actions-${slide.id}`}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0 }}
+                    transition={{ duration: 0.35, delay: 0.15 }}
+                    className="flex flex-wrap items-center gap-3.5 mb-6"
+                  >
+                    <Link
+                      to={slide.primaryCta.href}
+                      className="inline-flex items-center gap-2 px-6 py-3 rounded-xl font-semibold text-sm transition-all duration-300 bg-gradient-to-r from-amber-400 via-amber-300 to-amber-500 text-emerald-950 shadow-xl hover:shadow-amber-400/30 hover:-translate-y-0.5"
+                    >
+                      <span>{slide.primaryCta.label}</span>
+                      <ArrowRight className="w-4 h-4" />
+                    </Link>
+
+                    <Link
+                      to={slide.secondaryCta.href}
+                      className="inline-flex items-center gap-2 px-5 py-3 rounded-xl font-semibold text-sm transition-all duration-300 bg-white/10 hover:bg-white/20 border border-white/25 text-white backdrop-blur-md hover:-translate-y-0.5"
+                    >
+                      <span>{slide.secondaryCta.label}</span>
+                    </Link>
+                  </motion.div>
+                </AnimatePresence>
+
+                {/* AI Search Bar */}
                 <form
                   onSubmit={handleSearchSubmit}
-                  className="relative flex items-center w-full rounded-2xl bg-white/[0.10] backdrop-blur-2xl border border-white/20 p-2 shadow-2xl transition-all duration-300 focus-within:border-amber-400/70 focus-within:bg-white/[0.14] focus-within:ring-4 focus-within:ring-amber-400/10 group"
+                  className="relative flex items-center w-full rounded-xl bg-black/40 border border-white/25 p-1.5 transition-all duration-300 focus-within:border-amber-400/80 focus-within:bg-black/60 focus-within:ring-2 focus-within:ring-amber-400/20"
                 >
-                  <div className="pl-3.5 pr-2 text-amber-300 flex items-center">
-                    <Sparkles className="w-5 h-5 animate-pulse" />
+                  <div className="pl-3 pr-2 text-amber-300 flex items-center">
+                    <Sparkles className="w-4 h-4 animate-pulse" />
                   </div>
                   <input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder={t.hero.searchPlaceholder || "Search blood, volunteers, emergency, NGOs..."}
-                    className="w-full bg-transparent border-0 outline-none px-2 py-2.5 text-sm sm:text-base text-white placeholder:text-white/50 font-sans"
+                    placeholder={t.hero.searchPlaceholder || "Search blood donors, volunteers, emergency, NGOs..."}
+                    className="w-full bg-transparent border-0 outline-none px-2 py-2 text-xs sm:text-sm text-white placeholder:text-white/50 font-sans"
                   />
                   <button
                     type="submit"
-                    className="inline-flex items-center gap-1.5 px-4 py-2.5 rounded-xl bg-amber-400 hover:bg-amber-300 text-emerald-950 font-semibold text-xs sm:text-sm transition-all duration-200 shrink-0"
+                    className="inline-flex items-center gap-1.5 px-4 py-2 rounded-lg bg-amber-400 hover:bg-amber-300 text-emerald-950 font-semibold text-xs sm:text-sm transition-all duration-200 shrink-0"
                   >
                     <Search className="w-3.5 h-3.5" />
                     <span>{t.hero.askAI || 'Search'}</span>
@@ -430,8 +429,8 @@ export default function Home() {
 
                 {/* Quick links */}
                 {t.hero.quickLinks && t.hero.quickLinks.length > 0 && (
-                  <div className="flex flex-wrap items-center gap-2 mt-3 text-xs text-white/70">
-                    <span className="font-mono-ibm text-[11px] uppercase tracking-wider text-amber-300 flex items-center gap-1">
+                  <div className="flex flex-wrap items-center gap-1.5 mt-3 text-[11px] text-white/70">
+                    <span className="font-mono-ibm uppercase tracking-wider text-amber-300 flex items-center gap-1">
                       <Zap className="w-3 h-3" /> Quick:
                     </span>
                     {t.hero.quickLinks.map((linkText: string, idx: number) => (
@@ -439,32 +438,32 @@ export default function Home() {
                         key={idx}
                         type="button"
                         onClick={() => handleQuickLinkClick(linkText)}
-                        className="px-2.5 py-1 rounded-full bg-white/[0.08] hover:bg-white/[0.16] border border-white/10 hover:border-amber-400/40 text-emerald-100 text-[11px] transition-all duration-200"
+                        className="px-2 py-0.5 rounded-full bg-white/10 hover:bg-white/20 border border-white/15 text-emerald-100 transition-all duration-150"
                       >
                         {linkText}
                       </button>
                     ))}
                   </div>
                 )}
-              </div>
 
+              </div>
             </div>
 
-            {/* Right Slide Carousel Navigation Preview */}
-            <div className="lg:col-span-4 hidden lg:flex flex-col gap-3">
-              <div className="p-4 rounded-2xl bg-white/[0.06] border border-white/15 backdrop-blur-xl shadow-2xl">
-                <div className="flex items-center justify-between mb-3 text-xs font-mono-ibm text-emerald-100/70">
+            {/* Right Interactive Photo Navigation Panel */}
+            <div className="lg:col-span-5 hidden lg:flex flex-col gap-3">
+              <div className="p-4 rounded-3xl bg-black/60 border border-white/20 backdrop-blur-2xl shadow-2xl">
+                <div className="flex items-center justify-between mb-3 text-xs font-mono-ibm text-emerald-100/90 px-1">
                   <span className="flex items-center gap-1.5">
-                    <Award className="w-3.5 h-3.5 text-amber-300" />
-                    Featured Spotlights ({currentSlide + 1}/{HERO_SLIDES.length})
+                    <Camera className="w-4 h-4 text-amber-300" />
+                    Photo Slides ({currentSlide + 1} of {HERO_SLIDES.length})
                   </span>
                   <button
                     type="button"
                     onClick={() => setIsAutoPlay(!isAutoPlay)}
-                    className="p-1 rounded hover:bg-white/10 text-white/70 hover:text-white transition-colors"
-                    title={isAutoPlay ? 'Pause Carousel' : 'Play Carousel'}
+                    className="flex items-center gap-1 px-2 py-1 rounded bg-white/10 hover:bg-white/20 text-white text-[11px] transition-colors"
                   >
-                    {isAutoPlay ? <Pause className="w-3.5 h-3.5" /> : <Play className="w-3.5 h-3.5" />}
+                    {isAutoPlay ? <Pause className="w-3 h-3" /> : <Play className="w-3 h-3" />}
+                    <span>{isAutoPlay ? 'Pause' : 'Auto-Play'}</span>
                   </button>
                 </div>
 
@@ -474,22 +473,27 @@ export default function Home() {
                       key={s.id}
                       type="button"
                       onClick={() => setCurrentSlide(idx)}
-                      className={`flex items-center gap-3 p-2 rounded-xl text-left transition-all duration-300 border ${
+                      className={`group flex items-center gap-3.5 p-2 rounded-2xl text-left transition-all duration-300 border ${
                         idx === currentSlide
-                          ? 'bg-amber-400/15 border-amber-400/50 shadow-md translate-x-1'
-                          : 'bg-white/[0.03] border-white/5 hover:bg-white/[0.08] hover:border-white/15'
+                          ? 'bg-amber-400/20 border-amber-400 shadow-lg translate-x-1.5'
+                          : 'bg-white/[0.04] border-white/10 hover:bg-white/[0.12] hover:border-white/25'
                       }`}
                     >
-                      <img
-                        src={s.image}
-                        alt={s.title}
-                        className="w-12 h-10 object-cover rounded-lg shrink-0 border border-white/20"
-                      />
-                      <div className="min-w-0">
-                        <div className={`text-xs font-semibold truncate ${idx === currentSlide ? 'text-amber-300' : 'text-white/90'}`}>
+                      <div className="relative w-16 h-12 rounded-xl overflow-hidden shrink-0 border border-white/30 shadow">
+                        <img
+                          src={s.image}
+                          alt={s.title}
+                          className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                        />
+                        {idx === currentSlide && (
+                          <div className="absolute inset-0 bg-amber-400/20 border-2 border-amber-400 rounded-xl" />
+                        )}
+                      </div>
+                      <div className="min-w-0 flex-1">
+                        <div className={`text-xs font-semibold truncate ${idx === currentSlide ? 'text-amber-300' : 'text-white'}`}>
                           {s.tag}
                         </div>
-                        <div className="text-[11px] text-white/50 truncate">
+                        <div className="text-[11px] text-white/65 truncate">
                           {s.title}
                         </div>
                       </div>
@@ -502,30 +506,30 @@ export default function Home() {
           </div>
 
           {/* Carousel Slide Bar Controls */}
-          <div className="flex items-center justify-between mt-12 pt-6 border-t border-white/10">
-            {/* Dots */}
-            <div className="flex items-center gap-2">
+          <div className="flex items-center justify-between mt-8 pt-5 border-t border-white/15">
+            {/* Slide Indicator Bar */}
+            <div className="flex items-center gap-2.5">
               {HERO_SLIDES.map((_, idx) => (
                 <button
                   key={idx}
                   type="button"
                   onClick={() => setCurrentSlide(idx)}
-                  className={`h-2 rounded-full transition-all duration-300 ${
+                  className={`h-2.5 rounded-full transition-all duration-300 ${
                     idx === currentSlide
-                      ? 'w-8 bg-amber-400 shadow-[0_0_12px_rgba(251,191,36,0.8)]'
-                      : 'w-2 bg-white/30 hover:bg-white/60'
+                      ? 'w-10 bg-amber-400 shadow-[0_0_15px_rgba(251,191,36,0.9)]'
+                      : 'w-2.5 bg-white/35 hover:bg-white/70'
                   }`}
                   aria-label={`Go to slide ${idx + 1}`}
                 />
               ))}
             </div>
 
-            {/* Arrows */}
+            {/* Navigation Arrows */}
             <div className="flex items-center gap-2">
               <button
                 type="button"
                 onClick={prevSlide}
-                className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white transition-all duration-200 active:scale-95 shadow-md"
+                className="p-3 rounded-xl bg-black/40 hover:bg-black/70 border border-white/20 text-white transition-all duration-200 active:scale-95 shadow-lg backdrop-blur-md"
                 aria-label="Previous Slide"
               >
                 <ChevronLeft className="w-5 h-5" />
@@ -533,7 +537,7 @@ export default function Home() {
               <button
                 type="button"
                 onClick={nextSlide}
-                className="p-2.5 rounded-xl bg-white/10 hover:bg-white/20 border border-white/15 text-white transition-all duration-200 active:scale-95 shadow-md"
+                className="p-3 rounded-xl bg-black/40 hover:bg-black/70 border border-white/20 text-white transition-all duration-200 active:scale-95 shadow-lg backdrop-blur-md"
                 aria-label="Next Slide"
               >
                 <ChevronRight className="w-5 h-5" />
@@ -545,15 +549,15 @@ export default function Home() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════════
-          LIVE IMPACT METRICS
+          LIVE IMPACT METRICS BAR
       ════════════════════════════════════════════════════════════════════ */}
       <section className="relative z-10 -mt-2 px-6 md:px-8">
         <div
           className="mx-auto rounded-2xl overflow-hidden border backdrop-blur-2xl shadow-2xl"
           style={{
             maxWidth: 1280,
-            background: 'rgba(7, 32, 24, 0.85)',
-            borderColor: 'rgba(247,241,225,0.12)',
+            background: 'rgba(7, 32, 24, 0.88)',
+            borderColor: 'rgba(247,241,225,0.14)',
           }}
         >
           <div className="grid grid-cols-2 md:grid-cols-4">
@@ -570,9 +574,64 @@ export default function Home() {
       </section>
 
       {/* ════════════════════════════════════════════════════════════════════
+          PHOTO SLIDE STRIP — DEDICATED VISUAL GALLERY BAR
+      ════════════════════════════════════════════════════════════════════ */}
+      <section className="px-6 md:px-8 pt-20 pb-10" style={{ background: INK }}>
+        <div className="mx-auto" style={{ maxWidth: 1280 }}>
+          <Reveal>
+            <div className="flex flex-col md:flex-row md:items-end justify-between mb-8 gap-4">
+              <div>
+                <Eyebrow label="On-Ground Photography" />
+                <h2 className="font-fraunces mt-3 text-2xl sm:text-3xl font-semibold text-white">
+                  Live Action from Across Bangladesh
+                </h2>
+              </div>
+              <p className="text-xs sm:text-sm text-[rgba(247,241,225,0.7)] max-w-md">
+                Real photos from active volunteer deployments, blood drives, medical missions, and flood relief operations.
+              </p>
+            </div>
+          </Reveal>
+
+          {/* Horizontal Photo Slider Grid */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+            {HERO_SLIDES.map((s, idx) => (
+              <motion.div
+                key={s.id}
+                initial={{ opacity: 0, y: 20 }}
+                whileInView={{ opacity: 1, y: 0 }}
+                viewport={{ once: true }}
+                transition={{ duration: 0.4, delay: idx * 0.08 }}
+                onClick={() => {
+                  setCurrentSlide(idx);
+                  window.scrollTo({ top: 0, behavior: 'smooth' });
+                }}
+                className="group relative rounded-2xl overflow-hidden border border-white/15 cursor-pointer shadow-lg hover:border-amber-400 hover:shadow-2xl transition-all duration-300"
+              >
+                <div className="aspect-[4/3] w-full overflow-hidden">
+                  <img
+                    src={s.image}
+                    alt={s.title}
+                    className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-500"
+                  />
+                </div>
+                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent p-3 flex flex-col justify-end">
+                  <span className="text-[10px] font-mono-ibm font-semibold text-amber-300 uppercase tracking-wider">
+                    {s.tag}
+                  </span>
+                  <p className="text-xs font-semibold text-white truncate">
+                    {s.title}
+                  </p>
+                </div>
+              </motion.div>
+            ))}
+          </div>
+        </div>
+      </section>
+
+      {/* ════════════════════════════════════════════════════════════════════
           CORE PLATFORM SERVICES
       ════════════════════════════════════════════════════════════════════ */}
-      <section className="px-6 md:px-8 py-28 md:py-32" style={{ background: INK }}>
+      <section className="px-6 md:px-8 py-24 md:py-28" style={{ background: INK }}>
         <div className="mx-auto" style={{ maxWidth: 1280 }}>
           <Reveal>
             <div className="text-center mb-16 max-w-2xl mx-auto">
